@@ -1,0 +1,2 @@
+import type {Item} from '../types';
+export const weapons:Item[]=[{id:'pulse-blade',name:'Pulse blade',rarity:'Rare',image:'',description:'A clean strike through the multiverse.',modifiers:{combat:4,strength:2},unlockLevel:1,franchises:[],groups:[],characters:[],slot:'weapon',cost:150},{id:'blaster',name:'Nova blaster',rarity:'Epic',image:'',description:'Compact technology. Cosmic impact.',modifiers:{power:4,tech:3},unlockLevel:3,franchises:[],groups:[],characters:[],slot:'weapon',cost:180}];

@@ -1,0 +1,1 @@
+export const franchises=[{id:'rangers',name:'Power Rangers',subtitle:'Command centre',color:'#f25e66',symbol:'⚡'},{id:'marvel',name:'Marvel',subtitle:'Heroes assemble',color:'#c8fc60',symbol:'✦'},{id:'dc',name:'Justice League / DC',subtitle:'Dark heroic city',color:'#8d9fff',symbol:'◆'},{id:'rick',name:'Rick and Morty',subtitle:'Beyond the portal',color:'#5eeac1',symbol:'◎'}];
