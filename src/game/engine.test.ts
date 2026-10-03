@@ -79,13 +79,14 @@ describe("battle rules", () => {
     const s = fresh(),
       b = createBattle(s.owned, "Quick Battle", "Easy");
     b.result = "player";
+    b.round = 2;
     b.scores = [2, 0];
     b.strengthWins = 2;
     rewardMatch(s, b);
     expect(s.wins).toBe(1);
-    expect(s.xp).toBe(65);
-    expect(s.coins).toBe(440);
-    expect(s.cards["marvel-0"].xp).toBe(40);
+    expect(s.xp).toBe(42);
+    expect(s.coins).toBe(413);
+    expect(s.cards["marvel-0"].xp).toBe(20);
     expect(s.perfectWins).toBe(1);
     expect(s.strengthWins).toBe(2);
   });
@@ -102,7 +103,7 @@ describe("progression and equipment", () => {
   });
   it("unlocks use data requirements", () => {
     const s = fresh();
-    s.xp = 29 * 150;
+    s.xp = 39 * 150;
     unlock(s);
     expect(s.owned.length).toBe(32);
     expect(s.cards["dc-7"].level).toBe(1);
@@ -161,7 +162,7 @@ describe("save boundary", () => {
       name: "City defenders",
       rule: "Mixed Universe",
     });
-    expect(parseSave(JSON.stringify(s)).owned.length).toBe(16);
+    expect(parseSave(JSON.stringify(s)).owned.length).toBe(4);
   });
   it("makes the first character level improve some stats", () => {
     const s = fresh(),

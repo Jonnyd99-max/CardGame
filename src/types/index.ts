@@ -70,6 +70,8 @@ export interface Deck {
   rule: DeckRule;
 }
 export interface Save {
+  balanceVersion?: number;
+  starterFranchise?: string;
   presentationVersion?: number;
   version: 1;
   name: string;

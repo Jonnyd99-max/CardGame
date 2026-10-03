@@ -23,6 +23,45 @@ export const cardProgress = () => ({
   style: "original",
   wins: 0,
 });
+export function unlockLevelFor(c: Character, s: Save) {
+  return c.franchise === (s.starterFranchise || s.franchise)
+    ? c.unlockLevel
+    : Math.max(
+        c.unlockLevel,
+        config.otherUniverseUnlocks[Number(c.id.split("-").at(-1))] ||
+          c.unlockLevel,
+      );
+}
+export function migrateBalance(s: Save) {
+  if (s.balanceVersion === 1) return s;
+  s.starterFranchise = s.franchise;
+  const starters = characters
+    .filter((c) => c.franchise === s.starterFranchise && c.unlockLevel === 1)
+    .map((c) => c.id);
+  s.owned = s.owned.filter(
+    (id) =>
+      unlockLevelFor(characters.find((c) => c.id === id)!, s) <=
+      playerLevel(s.xp),
+  );
+  for (const id of starters) {
+    if (!s.owned.includes(id)) s.owned.push(id);
+    s.cards[id] ||= cardProgress();
+  }
+  // Keep gated card progress in the save, so it is restored when earned again.
+  for (const deck of s.decks) {
+    deck.cards = deck.cards.filter((id) => s.owned.includes(id));
+    if (validateDeck(deck, s)) {
+      deck.cards = [...starters];
+      deck.rule = "Single Franchise";
+    }
+  }
+  if (!s.owned.includes(s.favourite)) {
+    s.favourite = starters[0];
+    s.group = characters.find((c) => c.id === s.favourite)!.group;
+  }
+  s.balanceVersion = 1;
+  return s;
+}
 export function statsFor(c: Character, s: Save): Stats {
   const p = s.cards[c.id] || cardProgress();
   return Object.fromEntries(
@@ -70,11 +109,11 @@ export function compatible(c: Character, item: Item) {
 export function unlock(s: Save) {
   const level = playerLevel(s.xp);
   characters
-    .filter((c) => c.unlockLevel <= level)
+    .filter((c) => unlockLevelFor(c, s) <= level)
     .forEach((c) => {
       if (!s.owned.includes(c.id)) {
         s.owned.push(c.id);
-        s.cards[c.id] = cardProgress();
+        s.cards[c.id] ||= cardProgress();
       }
     });
   return s;

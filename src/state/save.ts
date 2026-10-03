@@ -8,6 +8,7 @@ import {
   items,
   compatible,
   validateDeck,
+  migrateBalance,
 } from "../game/progression";
 import { statKeys, type Save } from "../types";
 export const SAVE_KEY = "jd-multiverse-v1";
@@ -22,6 +23,8 @@ export function newSave(
   return {
     version: 1,
     presentationVersion: 2,
+    balanceVersion: 1,
+    starterFranchise: franchise,
     name,
     xp: 0,
     coins: 350,
@@ -110,6 +113,10 @@ export function parseSave(raw: string): Save {
     fail();
   if (
     !s.owned.includes(s.favourite) ||
+    (s.starterFranchise !== undefined &&
+      !franchises.some((f) => f.id === s.starterFranchise)) ||
+    (s.balanceVersion !== undefined &&
+      (s.balanceVersion !== 1 || !s.starterFranchise)) ||
     !franchises.some((f) => f.id === s.franchise) ||
     !groups.some((g) => g.id === s.group && g.franchise === s.franchise)
   )
@@ -165,8 +172,10 @@ export function parseSave(raw: string): Save {
     )
   )
     fail();
-  for (const id of s.owned) {
+  if (s.owned.some((id) => !s.cards[id])) fail();
+  for (const id of Object.keys(s.cards)) {
     const c = characters.find((c) => c.id === id)!;
+    if (!c) fail();
     const p = s.cards[id];
     if (
       !record(p) ||
@@ -234,7 +243,7 @@ export function parseSave(raw: string): Save {
       fail();
   }
   if (!s.decks.some((d) => d.id === s.activeDeck)) fail();
-  return refreshPeriods(s);
+  return refreshPeriods(migrateBalance(s));
 }
 export const saveStorage = {
   error: "",

@@ -4,7 +4,7 @@ import { franchises } from "../data/franchises";
 import { groups } from "../data/groups";
 import { Artwork } from "../components/Card";
 import { Progress } from "../components/UI";
-import { playerLevel } from "../game/progression";
+import { playerLevel, unlockLevelFor } from "../game/progression";
 import { challenges } from "../data/challenges";
 import type { Save } from "../types";
 export function Profile({ save: s }: { save: Save }) {
@@ -127,7 +127,7 @@ export function Groups({
                         <small>
                           {s.owned.includes(c.id)
                             ? "Owned"
-                            : `Level ${c.unlockLevel}`}
+                            : `Level ${unlockLevelFor(c, s)}`}
                         </small>
                       </button>
                     ))}

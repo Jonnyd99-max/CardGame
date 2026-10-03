@@ -1,7 +1,7 @@
 import { Lock, Star } from "lucide-react";
 import { rarities } from "../data/rarities";
 import { franchises } from "../data/franchises";
-import { powerFor, statsFor } from "../game/progression";
+import { powerFor, statsFor, unlockLevelFor } from "../game/progression";
 import type { Character, Save } from "../types";
 export function Artwork({ character: c }: { character: Character }) {
   if (c.image && c.imageSheet) {
@@ -137,7 +137,7 @@ export function Card({
         {locked && (
           <div className="lock-label">
             <Lock size={25} />
-            <span>Unlock at level {c.unlockLevel}</span>
+            <span>Unlock at level {unlockLevelFor(c, s)}</span>
           </div>
         )}
         {!hideStats && (

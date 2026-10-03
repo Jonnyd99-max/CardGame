@@ -8,6 +8,7 @@ import {
   createBattle,
   playRound,
   aiStat,
+  matchPrizes,
   type Battle as Match,
 } from "../game/battle";
 import { statsFor, validateDeck } from "../game/progression";
@@ -42,6 +43,25 @@ export function BattlePage({
       onComplete(next);
     }
   }
+  const selectedDeck = s.decks.find((d) => d.id === deck)!;
+  const selectedLimit =
+    mode === "Quick Battle"
+      ? 3
+      : mode === "Team Battle"
+        ? selectedDeck.cards.length
+        : rounds;
+  const sweepRounds =
+    mode === "Quick Battle" || mode === "Best of"
+      ? Math.floor(selectedLimit / 2) + 1
+      : selectedLimit;
+  const sweep = matchPrizes({
+    mode,
+    target: rounds,
+    participants: selectedDeck.cards,
+    round: sweepRounds,
+    scores: [sweepRounds, 0],
+    result: "player",
+  });
   if (!battle)
     return (
       <>
@@ -108,7 +128,7 @@ export function BattlePage({
               ))}
             </select>
           </label>
-          {mode === "Best of" && (
+          {(mode === "Best of" || mode === "Crossover Battle") && (
             <label>
               Round limit
               <select
@@ -140,6 +160,29 @@ export function BattlePage({
           </button>
           <p>{validateDeck(s.decks.find((d) => d.id === deck)!, s)}</p>
         </div>
+        <div className="panel">
+          <h2>Earn your prizes</h2>
+          {mode !== "Classic" && (
+            <p>
+              <strong>
+                A {sweepRounds}–0 clean sweep: {sweep.xp} XP · {sweep.coins}{" "}
+                coins · {sweep.materials}{" "}
+                {sweep.materials === 1 ? "material" : "materials"}
+              </strong>
+            </p>
+          )}
+          <p>
+            Each round played earns 4 XP and 6 coins. Each round you win adds 8
+            XP and 12 coins. Win the match for a bonus that grows with the round
+            limit.
+          </p>
+          <p>
+            Materials: one for a match victory, plus one per 3 rounds won and
+            per 6 rounds played, up to 6. Classic prizes count up to{" "}
+            {progression.rewardedRoundCap} played rounds. Unfinished matches
+            award no prizes.
+          </p>
+        </div>
         <div className="tip">
           Opponent attributes stay hidden until the round resolves. AI uses only
           its own card and public base-stat averages. Classic resolves at{" "}
@@ -154,7 +197,8 @@ export function BattlePage({
     ac =
       characters.find((c) => c.id === (battle.last?.aiId || battle.ai[0])) ||
       characters[0],
-    ps = statsFor(pc, s);
+    ps = statsFor(pc, s),
+    prizes = matchPrizes(battle);
   return (
     <div className="arena">
       <div className="arena-header">
@@ -266,20 +310,20 @@ export function BattlePage({
                 : "The next battle is yours."}
           </h1>
           <p>
-            {battle.scores.join(" : ")} · +
-            {battle.result === "player"
-              ? progression.matchXP
-              : progression.lossXP}{" "}
-            XP · +
-            {battle.result === "player"
-              ? progression.winCoins
-              : progression.lossCoins}{" "}
-            coins · +
-            {battle.result === "player"
-              ? progression.winMaterials
-              : progression.lossMaterials}{" "}
-            materials
+            {battle.scores.join(" : ")} · +{prizes.xp} XP · +{prizes.coins}{" "}
+            coins · +{prizes.materials}{" "}
+            {prizes.materials === 1 ? "material" : "materials"}
           </p>
+          <p>
+            {battle.round} rounds played · {battle.scores[0]} rounds won · +
+            {prizes.characterXP} XP per participating character
+          </p>
+          {!!prizes.bonusXP && (
+            <p>
+              Victory bonus included: +{prizes.bonusXP} XP and +
+              {prizes.bonusCoins} coins.
+            </p>
+          )}
           <button className="primary" onClick={onExit}>
             {tutorial ? "Enter your home" : "Return home"}{" "}
             <ArrowRight size={18} />

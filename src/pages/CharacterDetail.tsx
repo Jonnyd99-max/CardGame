@@ -12,6 +12,7 @@ import {
   items,
   compatible,
   playerLevel,
+  unlockLevelFor,
 } from "../game/progression";
 import { statKeys, type Save } from "../types";
 export function CharacterDetail({
@@ -69,8 +70,14 @@ export function CharacterDetail({
         <p className="muted">{c.description}</p>
         {!owned ? (
           <div className="panel">
-            <Lock /> Unlocks at player level {c.unlockLevel}. Current level:{" "}
-            {playerLevel(s.xp)}.
+            <Lock /> Unlocks at player level {unlockLevelFor(c, s)}. Current
+            level: {playerLevel(s.xp)}.
+            {s.cards[id] && (
+              <p>
+                Your earlier training and upgrades are saved for when this card
+                unlocks again.
+              </p>
+            )}
           </div>
         ) : (
           <>

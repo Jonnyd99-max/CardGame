@@ -56,6 +56,54 @@ export interface Battle {
   participants: string[];
   tutorial: boolean;
 }
+export function roundLimit(
+  b: Pick<Battle, "mode" | "target" | "participants">,
+) {
+  return b.mode === "Classic"
+    ? progression.classicRoundLimit
+    : b.mode === "Quick Battle"
+      ? 3
+      : b.mode === "Team Battle"
+        ? b.participants.length
+        : b.target;
+}
+export function matchPrizes(
+  b: Pick<
+    Battle,
+    "mode" | "target" | "participants" | "round" | "scores" | "result"
+  >,
+) {
+  if (!b.result)
+    return {
+      xp: 0,
+      coins: 0,
+      materials: 0,
+      characterXP: 0,
+      rounds: 0,
+      wins: 0,
+      bonusXP: 0,
+      bonusCoins: 0,
+    };
+  const rounds = Math.min(b.round, progression.rewardedRoundCap);
+  const wins = Math.min(b.scores[0], rounds);
+  const duration = Math.min(roundLimit(b), progression.rewardedRoundCap);
+  const won = b.result === "player";
+  const bonusXP = won ? 12 + duration * 2 : 0;
+  const bonusCoins = won ? 18 + duration * 3 : 0;
+  return {
+    xp: rounds * 4 + wins * 8 + bonusXP,
+    coins: rounds * 6 + wins * 12 + bonusCoins,
+    materials: Math.min(
+      6,
+      Math.floor(rounds / 6) + Math.floor(wins / 3) + (won ? 1 : 0),
+    ),
+    characterXP: rounds * 2 + wins * 4 + (won ? 8 : 0),
+    rounds,
+    wins,
+    bonusXP,
+    bonusCoins,
+  };
+}
 export function createBattle(
   ids: string[],
   mode: Mode,
@@ -147,12 +195,7 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
   } else {
     next.player.push(next.player.shift()!);
     next.ai.push(next.ai.shift()!);
-    const limit =
-      b.mode === "Quick Battle"
-        ? 3
-        : b.mode === "Team Battle"
-          ? b.participants.length
-          : b.target;
+    const limit = roundLimit(b);
     if (
       next.round >= limit ||
       ((b.mode === "Best of" || b.mode === "Quick Battle") &&
@@ -171,6 +214,7 @@ export function rewardMatch(s: Save, b: Battle) {
   if (!b.result) return s;
   refreshPeriods(s);
   const won = b.result === "player";
+  const prizes = matchPrizes(b);
   if (won) {
     s.wins++;
     s.periods.dailyWins++;
@@ -184,12 +228,12 @@ export function rewardMatch(s: Save, b: Battle) {
   } else if (b.result === "ai") s.losses++;
   s.roundWins += b.scores[0];
   s.strengthWins += b.strengthWins;
-  s.coins += won ? progression.winCoins : progression.lossCoins;
-  s.materials += won ? progression.winMaterials : progression.lossMaterials;
+  s.coins += prizes.coins;
+  s.materials += prizes.materials;
   b.participants.forEach((id) => {
     const p = s.cards[id];
     if (p) {
-      p.xp += won ? progression.winCharacterXP : progression.lossCharacterXP;
+      p.xp += prizes.characterXP;
       p.wins += won ? 1 : 0;
     }
   });
@@ -200,5 +244,5 @@ export function rewardMatch(s: Save, b: Battle) {
     score: b.scores.join(" : "),
   });
   s.history = s.history.slice(0, 30);
-  return grantXP(s, won ? progression.matchXP : progression.lossXP);
+  return grantXP(s, prizes.xp);
 }
