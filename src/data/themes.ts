@@ -1,1 +1,9 @@
-export const themes:Record<string,{accent:string;glow:string;arena:string}>={rangers:{accent:'#f57778',glow:'#582333',arena:'Command centre'},marvel:{accent:'#c8fc60',glow:'#374625',arena:'Neon city'},dc:{accent:'#9baaff',glow:'#24294e',arena:'Gotham skyline'},rick:{accent:'#5eeac1',glow:'#1f4943',arena:'Portal dimension'}};
+export const themes: Record<
+  string,
+  { accent: string; glow: string; arena: string }
+> = {
+  rangers: { accent: "#f57778", glow: "#582333", arena: "Command centre" },
+  marvel: { accent: "#c8fc60", glow: "#374625", arena: "Neon city" },
+  dc: { accent: "#9baaff", glow: "#24294e", arena: "Gotham skyline" },
+  rick: { accent: "#5eeac1", glow: "#1f4943", arena: "Portal dimension" },
+};

@@ -1,2 +1,45 @@
-import type {Item} from '../types';
-export const equipment:Item[]=[{id:'shield',name:'Aegis armour',rarity:'Rare',image:'',description:'A reactive shield woven from dimensional energy.',modifiers:{durability:4,strength:2},unlockLevel:1,franchises:[],groups:[],characters:[],slot:'equipment',cost:120},{id:'scanner',name:'Quantum scanner',rarity:'Uncommon',image:'',description:'Read the battlefield before it changes.',modifiers:{intelligence:3,tech:4},unlockLevel:1,franchises:[],groups:[],characters:[],slot:'equipment',cost:100},{id:'morpher',name:'Prism morpher',rarity:'Epic',image:'',description:'Channel the power of the morphing grid.',modifiers:{power:5,combat:2},unlockLevel:5,franchises:['rangers'],groups:[],characters:[],slot:'equipment',cost:220}];
+import type { Item } from "../types";
+export const equipment: Item[] = [
+  {
+    id: "shield",
+    name: "Aegis armour",
+    rarity: "Rare",
+    image: "",
+    description: "A reactive shield woven from dimensional energy.",
+    modifiers: { durability: 4, strength: 2 },
+    unlockLevel: 1,
+    franchises: [],
+    groups: [],
+    characters: [],
+    slot: "equipment",
+    cost: 120,
+  },
+  {
+    id: "scanner",
+    name: "Quantum scanner",
+    rarity: "Uncommon",
+    image: "",
+    description: "Read the battlefield before it changes.",
+    modifiers: { intelligence: 3, tech: 4 },
+    unlockLevel: 1,
+    franchises: [],
+    groups: [],
+    characters: [],
+    slot: "equipment",
+    cost: 100,
+  },
+  {
+    id: "morpher",
+    name: "Prism morpher",
+    rarity: "Epic",
+    image: "",
+    description: "Channel the power of the morphing grid.",
+    modifiers: { power: 5, combat: 2 },
+    unlockLevel: 5,
+    franchises: ["rangers"],
+    groups: [],
+    characters: [],
+    slot: "equipment",
+    cost: 220,
+  },
+];

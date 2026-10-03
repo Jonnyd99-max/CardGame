@@ -1,0 +1,109 @@
+.battle-card {
+  animation: card-arrive 0.45s ease both;
+  backface-visibility: hidden;
+}
+.battle-card[aria-label*="Epic"] {
+  box-shadow:
+    0 0 18px #b790ff0c,
+    inset 0 0 12px #b790ff04;
+}
+.battle-card[aria-label*="Legendary"] {
+  background: linear-gradient(145deg, #302b22, #17151e);
+  box-shadow: 0 0 22px #ffcb7210;
+}
+.battle-card[aria-label*="Mythic"] {
+  background: linear-gradient(145deg, #2d2038, #17141f);
+  box-shadow: 0 0 25px #ff79b618;
+}
+.battle-card[aria-label*="Mythic"] .card-top {
+  color: #ffb0d3;
+}
+.app[data-universe="rangers"] .arena {
+  background-image:
+    linear-gradient(#f5777806 1px, transparent 1px),
+    linear-gradient(90deg, #f5777806 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 45%, #58233345, transparent 70%);
+  background-size:
+    48px 48px,
+    48px 48px,
+    100% 100%;
+}
+.app[data-universe="marvel"] .arena {
+  background-image:
+    radial-gradient(#c8fc6010 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 45%, #37462560, transparent 70%);
+  background-size:
+    12px 12px,
+    100% 100%;
+}
+.app[data-universe="dc"] .arena {
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 55px,
+      #8d9fff05 55px 75px,
+      transparent 75px 100px
+    ),
+    radial-gradient(ellipse at 50% 45%, #24294e65, transparent 70%);
+}
+.app[data-universe="rick"] .arena {
+  background-image:
+    repeating-radial-gradient(
+      ellipse at 50% 40%,
+      transparent 0 65px,
+      #5eeac106 66px 68px,
+      transparent 69px 95px
+    ),
+    radial-gradient(ellipse at 50% 45%, #1f494365, transparent 70%);
+}
+.match-result {
+  position: relative;
+  overflow: hidden;
+}
+.match-result.player:after {
+  content: "✦ · ✧ · ✦ · ✧ · ✦";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  color: var(--accent);
+  font-size: 35px;
+  letter-spacing: 35px;
+  opacity: 0.25;
+  pointer-events: none;
+  animation: celebrate 2.5s ease-out both;
+}
+.round-result {
+  animation: page-in 0.25s ease;
+}
+@keyframes card-arrive {
+  from {
+    opacity: 0;
+    transform: perspective(800px) rotateY(-18deg) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(800px) rotateY(0) translateY(0);
+  }
+}
+@keyframes celebrate {
+  from {
+    transform: translateY(-50px) rotate(-5deg);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.35;
+  }
+  to {
+    transform: translateY(300px) rotate(10deg);
+    opacity: 0;
+  }
+}
+.reduce-motion * {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+  }
+}

@@ -1,1 +1,21 @@
-export const progression={xpPerPlayerLevel:150,xpPerCharacterLevel:80,maxPlayerLevel:100,levelCoins:100,levelMaterials:2,deckMin:4,deckMax:12,matchXP:65,lossXP:25,winCoins:90,lossCoins:30};
+export const progression = {
+  xpPerPlayerLevel: 150,
+  xpPerCharacterLevel: 80,
+  maxPlayerLevel: 100,
+  levelCoins: 100,
+  levelMaterials: 2,
+  deckMin: 4,
+  deckMax: 12,
+  matchXP: 65,
+  lossXP: 25,
+  winCoins: 90,
+  lossCoins: 30,
+  winMaterials: 2,
+  lossMaterials: 1,
+  winCharacterXP: 40,
+  lossCharacterXP: 20,
+  characterLevelCoinMultiplier: 70,
+  statGrowthPerLevel: 0.45,
+  classicRoundLimit: 150,
+  rewardMilestones: [5, 10, 20, 30],
+};

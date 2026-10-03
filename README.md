@@ -50,6 +50,8 @@ public/        PWA icon and replaceable static artwork
 
 `App.tsx` owns navigation and immutable save updates. Game rules are independent of React. `saveStorage` is the persistence boundary: swap its methods for a server-backed repository when accounts/cloud saves are introduced. For multiplayer, the server should own match state, stat resolution and reward settlement. No account or paid-purchase infrastructure is present.
 
+`hooks/useInstall.ts` handles eligible browser install prompts. `themes/effects.css` contains arena patterns and rarity/reveal effects; `utils/audio.ts` exposes semantic audio events with a registry for future licensed audio files. Use `npm run format` to format source and `npm run preview` to serve the production build.
+
 ## Add content
 
 Character definitions live in `src/data/characters.ts`. Its compact sample generator builds full `Character` records; append records to the exported array or replace it with explicit data definitions. Add a unique ID, name, franchise/group IDs, rarity, description, image, unlock level, base/max stats, max level, ability IDs, compatibility lists, theme, tags, colour and placeholder avatar variant. All eight stat keys are required and use 1–100 values. Content should be validated and balanced when adding it. New characters appear automatically in collection, group pages, unlock logic and AI selection. Already eligible new content is granted on the next XP award.
@@ -72,9 +74,11 @@ Open `/#dev` after onboarding to edit/preview a template and export a character 
 
 Saves are versioned JSON in localStorage under `jd-multiverse-v1`. They include collection, character progression, gear, settings, favourites, deck definitions, currencies, recent match history and challenge counters. Settings has Export, validated Import (with replacement confirmation), and confirmed Reset. Clearing browser data removes the save; export backups regularly. Import rejects unsupported versions and malformed records. Daily rewards and daily/weekly challenge boundaries use the device's local date; Monday starts the week. Local time/storage can be edited, so this is not an anti-cheat system. A backend should use authoritative clocks and award transactions.
 
+An invalid existing save opens a recovery screen and preserves the stored file rather than replacing it with a fresh profile. Export the original file, restore a validated backup or explicitly confirm a fresh start. Save imports validate collection IDs, owned equipment/compatibility, levels, boosts, abilities, currencies, deck rules, settings and favourite references.
+
 ## PWA and accessibility
 
-Production builds include a generated manifest and Workbox service worker. After an initial online visit, cached app assets work offline. Browsers offer installation through their normal install menu when eligible; iOS uses Share → Add to Home Screen. The SVG icon is an initial placeholder; add raster 192/512 icons and platform-specific splash artwork for a production release. Responsive layouts accommodate touch screens, keyboard controls, focus outlines, labelled forms, dialog keyboard trapping and reduced motion. Browser storage must remain available for persistent progress.
+Production builds include a generated manifest and Workbox service worker. After an initial online visit, cached app assets work offline. Browsers offer installation through their normal install menu when eligible; iOS uses Share → Add to Home Screen. The original SVG mark is supplied with raster 192/512 icons; add platform-specific splash artwork for a production release. Responsive layouts accommodate touch screens, keyboard controls, focus outlines, labelled forms, dialog keyboard trapping and reduced motion. Browser storage must remain available for persistent progress.
 
 ## Testing
 
