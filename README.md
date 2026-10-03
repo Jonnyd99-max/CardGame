@@ -74,7 +74,7 @@ All 12 items have comic artwork. The seven Mighty Morphin Rangers each have an e
 
 ### Theme engine
 
-Theme data defines accent, glow and arena name. These are exposed as CSS variables at the app root; components inherit them. Favourite universe changes the interface/arena palette, favourite character changes hero/profile artwork and character-card colours. Rarities have separate border treatments. Card detail offers original and holographic styles. Settings allow animations, reduced motion and a sound toggle. Sound is a persisted placeholder for a future audio service; no sound assets are included. Device reduced-motion preferences are respected automatically.
+Theme data defines accent, glow and arena name. These are exposed as CSS variables at the app root; components inherit them. Favourite universe changes the interface/arena palette, favourite character changes hero/profile artwork and character-card colours. Rarities have separate border treatments. Card detail offers original and holographic styles. Settings allow animations, reduced motion and a sound toggle. Optional original sound effects are synthesised locally for rounds, victories, upgrades, unlocks and pack reveals. Settings includes a sound toggle and test button. Device reduced-motion preferences are respected automatically.
 
 ### Developer editor
 
@@ -96,11 +96,11 @@ Vitest covers stat comparison, capture/tie logic, majority wins, AI stat selecti
 
 ## Campaign, bosses and packs
 
-Campaign contains five ordered Angel Grove chapters at player levels 1, 3, 5, 8 and 12. The Thor and Lord Zedd boss chapters play every round so all three phases occur; enemy stats rise by 3 in each phase, capped at 100. First clears award coins, XP, materials and a personal weapon. Lord Zedd also unlocks Green Ranger early as a campaign reward. Replays award normal match prizes; first-clear rewards are never repeated. Existing saves gain optional campaign and pack counters without resetting progress; import validates chapter order and counters.
+Campaign contains ten ordered chapters across Angel Grove, Marvel, DC and Rick and Morty. The Rita and Lord Zedd boss chapters play every round so all three phases occur; enemy stats rise by 3 in each phase, capped at 100. First clears award coins, XP, materials and a personal weapon. Lord Zedd also unlocks Green Ranger early as a campaign reward. Replays award normal match prizes; first-clear rewards are never repeated. Existing saves gain optional campaign and pack counters without resetting progress; import validates chapter order and counters.
 
 Ranger synergy uses unique Rangers in the participating deck, excluding Lord Zedd: three Rangers grant +2 combat/power, five grant +4. Each equipped personal weapon adds +1 combat for the Ranger team, capped at +3. Bonuses apply only to Rangers, cap at 100 and are reflected in battle cards and comparison values.
 
-Scout packs cost 180 earned coins (level 1, 75% Common / 25% Uncommon). Hero packs cost 350 (level 5, 45% Common / 35% Uncommon / 20% Rare). Each contains one card and 1 or 2 materials. Only cards with effective unlock levels at most two above the player level are eligible; unavailable rarity pools fall back to Common. No Epic/Legendary/Mythic cards are in packs. Duplicates give 25% coin refunds, 2 extra materials and 20 card XP. Randomness is local; no real-money purchases.
+Scout packs cost 180 earned coins (level 1, 75% Common / 25% Uncommon). Hero packs cost 350 (level 5, 45% Common / 35% Uncommon / 20% Rare). Each contains one card and 1 or 2 materials. Every universe uses the same base card unlock levels for packs; cards at most two levels above the player level are eligible; unavailable rarity pools fall back to Common. No Epic/Legendary/Mythic cards are in packs. Duplicates give 25% coin refunds, 2 extra materials and 20 card XP. Randomness is local; no real-money purchases.
 
 ## Next development
 

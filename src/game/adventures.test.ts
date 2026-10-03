@@ -11,14 +11,66 @@ import {
 import { opponentStats, playRound } from "./battle";
 import { characters } from "../data/characters";
 import { statsFor } from "./progression";
+import { selectUniverse } from "./progression";
+import { chapters } from "./adventures";
+import { battleCharacters } from "../data/enemies";
 
 describe("campaign, bosses, team bonuses and packs", () => {
+  it("makes starter packs reach every universe without awarding top-tier cards", () => {
+    const found = new Set<string>();
+    for (let i = 0; i < 24; i++) {
+      const s = newSave("Player", "rangers", "rangers-0");
+      const rolls = [i < 12 ? 0 : 0.9, ((i % 12) + 0.1) / 12];
+      let n = 0;
+      const opened = openPack(s, "scout", () => rolls[n++])!;
+      const c = characters.find((c) => c.id === opened.card)!;
+      found.add(c.franchise);
+      expect(["Common", "Uncommon"]).toContain(c.rarity);
+      expect(parseSave(JSON.stringify(s)).owned).toContain(c.id);
+    }
+    expect([...found].sort()).toEqual(["dc", "marvel", "rangers", "rick"]);
+  });
+  it("preserves campaign saves and uses valid enemies in every chapter", () => {
+    const s = newSave("Player", "rangers", "rangers-0");
+    s.campaign = ["arrival", "ambush", "titan", "shadow", "zedd"];
+    expect(parseSave(JSON.stringify(s)).campaign).toEqual(s.campaign);
+    expect(chapters.length).toBe(10);
+    chapters.forEach((c) =>
+      c.opponents.forEach((id) =>
+        expect(battleCharacters.some((c) => c.id === id)).toBe(true),
+      ),
+    );
+    const b = campaignBattle(
+      newSave("Player", "rangers", "rangers-0"),
+      "arrival",
+      "starter",
+    )!;
+    expect(
+      playRound(b, "combat", newSave("Player", "rangers", "rangers-0")).last
+        ?.aiId,
+    ).toBe("enemy-putty");
+  });
+  it("switches theme preferences without changing starter unlock entitlement", () => {
+    const s = newSave("Player", "rangers", "rangers-0");
+    const owned = [...s.owned];
+    selectUniverse(s, "dc");
+    expect(s.franchise).toBe("dc");
+    expect(s.group).toBe("justice");
+    expect(s.starterFranchise).toBe("rangers");
+    expect(s.owned).toEqual(owned);
+    expect(parseSave(JSON.stringify(s)).franchise).toBe("dc");
+  });
   it("gates chapters and awards first clears once, preserving old saves", () => {
     const s = newSave("Player", "rangers", "rangers-0");
     expect(parseSave(JSON.stringify(s)).campaign).toBeUndefined();
     expect(chapterAvailable(s, "ambush")).toBe(false);
     const b = campaignBattle(s, "arrival", "starter")!;
-    expect(b.ai).toEqual(["rick-3", "rick-0", "rick-1", "rick-2"]);
+    expect(b.ai).toEqual([
+      "enemy-putty",
+      "enemy-putty",
+      "enemy-putty",
+      "enemy-putty",
+    ]);
     expect(claimChapter(s, b)).toBe(false);
     b.result = "player";
     expect(claimChapter(s, b)).toBe(true);

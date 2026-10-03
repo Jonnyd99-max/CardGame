@@ -301,7 +301,6 @@ export default function App() {
               save={save}
               tutorial={tutorial}
               onComplete={(b) => {
-                audio.play(b.result === "player" ? "matchWin" : "roundLoss");
                 update((s) => {
                   rewardMatch(s, b);
                 });

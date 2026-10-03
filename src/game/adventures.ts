@@ -17,7 +17,7 @@ export const chapters = [
     story:
       "A portal has scattered rivals across Angel Grove. Defend the city with your first team.",
     level: 1,
-    opponents: ["rick-3", "rick-0", "rick-1", "rick-2"],
+    opponents: ["enemy-putty", "enemy-putty", "enemy-putty", "enemy-putty"],
     rounds: 5,
     coins: 100,
     xp: 40,
@@ -29,7 +29,7 @@ export const chapters = [
     name: "The rooftop ambush",
     story: "Outsmart a skilled rival patrol and recover Billy’s Power Lance.",
     level: 3,
-    opponents: ["marvel-3", "dc-3", "marvel-5", "rick-4"],
+    opponents: ["enemy-goldar", "enemy-putty", "enemy-goldar", "enemy-putty"],
     rounds: 5,
     coins: 140,
     xp: 60,
@@ -38,11 +38,11 @@ export const chapters = [
   },
   {
     id: "titan",
-    name: "Thunder at the gates",
+    name: "Rita’s moon palace",
     story:
-      "Thor guards the next portal. Beat three escalating phases to claim the Power Bow.",
+      "Rita has opened a portal from her moon palace. Break her spell across three escalating phases.",
     level: 5,
-    opponents: ["marvel-6"],
+    opponents: ["enemy-rita"],
     rounds: 7,
     coins: 200,
     xp: 80,
@@ -55,7 +55,7 @@ export const chapters = [
     story:
       "A darker alliance awaits. Bring your Rangers together and recover the Power Axe.",
     level: 8,
-    opponents: ["dc-4", "rick-5", "marvel-4", "dc-5"],
+    opponents: ["enemy-goldar", "enemy-rita", "enemy-putty", "enemy-goldar"],
     rounds: 7,
     coins: 240,
     xp: 100,
@@ -74,6 +74,71 @@ export const chapters = [
     xp: 150,
     item: "dragon-dagger",
     card: "rangers-6",
+    boss: true,
+  },
+  {
+    id: "goblin",
+    name: "Chaos over New York",
+    story:
+      "Green Goblin has stolen a portal stabiliser. Stop his rooftop raids.",
+    level: 14,
+    opponents: ["enemy-goblin"],
+    rounds: 7,
+    coins: 260,
+    xp: 120,
+    item: "blaster",
+    boss: true,
+  },
+  {
+    id: "ultron",
+    name: "Age of machines",
+    story:
+      "Ultron is connecting the portals into a machine army. Shut him down.",
+    level: 16,
+    opponents: ["enemy-ultron"],
+    rounds: 9,
+    coins: 320,
+    xp: 150,
+    item: "scanner",
+    boss: true,
+  },
+  {
+    id: "gotham",
+    name: "Gotham’s wild cards",
+    story:
+      "Joker and Harley have turned Gotham’s portal into a trap. Outsmart their ambush.",
+    level: 18,
+    opponents: ["enemy-harley", "enemy-joker", "enemy-harley", "enemy-joker"],
+    rounds: 7,
+    coins: 280,
+    xp: 130,
+    item: "shield",
+    boss: false,
+  },
+  {
+    id: "joker",
+    name: "The last laugh",
+    story:
+      "Joker holds the portal key. Survive three phases of escalating tricks.",
+    level: 20,
+    opponents: ["enemy-joker"],
+    rounds: 9,
+    coins: 350,
+    xp: 160,
+    item: "pulse-blade",
+    boss: true,
+  },
+  {
+    id: "assassin",
+    name: "Beyond the finite curve",
+    story:
+      "Evil Morty has trapped your team beyond the Central Finite Curve. Fight through his dimensional alliance.",
+    level: 22,
+    opponents: ["rick-4", "rick-7", "rick-4", "rick-7"],
+    rounds: 9,
+    coins: 380,
+    xp: 180,
+    item: "scanner",
     boss: true,
   },
 ] as const;
@@ -183,7 +248,7 @@ export function openPack(
     return null;
   const eligible = characters.filter(
     (c) =>
-      unlockLevelFor(c, s) <= playerLevel(s.xp) + 2 &&
+      c.unlockLevel <= playerLevel(s.xp) + 2 &&
       ["Common", "Uncommon", "Rare"].includes(c.rarity),
   );
   const roll = Math.max(0, Math.min(0.999999, rng())) * 100;

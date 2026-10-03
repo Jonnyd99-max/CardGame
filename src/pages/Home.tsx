@@ -23,7 +23,14 @@ export function Home({
   navigate: (page: string) => void;
   detail: (id: string) => void;
 }) {
-  const fav = characters.find((c) => c.id === s.favourite) || characters[0];
+  const fav =
+    characters.find(
+      (c) => c.id === s.favourite && c.franchise === s.franchise,
+    ) ||
+    characters.find(
+      (c) => c.franchise === s.franchise && s.owned.includes(c.id),
+    ) ||
+    characters.find((c) => c.franchise === s.franchise)!;
   const featured = s.owned
     .map((id) => characters.find((c) => c.id === id)!)
     .sort(

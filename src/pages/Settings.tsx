@@ -5,6 +5,9 @@ import { franchises } from "../data/franchises";
 import { groups } from "../data/groups";
 import { parseSave } from "../state/save";
 import { Modal } from "../components/UI";
+import { selectUniverse } from "../game/progression";
+import { audio } from "../utils/audio";
+import { themes } from "../data/themes";
 import type { Save } from "../types";
 export function Settings({
   save: s,
@@ -71,10 +74,7 @@ export function Settings({
               value={s.franchise}
               onChange={(e) =>
                 update((x) => {
-                  x.franchise = e.target.value;
-                  x.group = groups.find(
-                    (g) => g.franchise === e.target.value,
-                  )!.id;
+                  selectUniverse(x, e.target.value);
                 })
               }
             >
@@ -127,6 +127,12 @@ export function Settings({
             Universe colours change the interface and arena. Your favourite
             character features on your home screen and profile.
           </p>
+          <div className="universe-preview">
+            <strong>
+              {franchises.find((f) => f.id === s.franchise)?.name}
+            </strong>
+            <p>{themes[s.franchise].arena} · Active comic theme</p>
+          </div>
           <h2 className="spaced">Take it with you</h2>
           {install ? (
             <button className="primary" onClick={install}>
@@ -142,6 +148,16 @@ export function Settings({
         </section>
         <section className="panel">
           <h2>Motion & audio</h2>
+          <button
+            className="secondary"
+            disabled={!s.settings.sound}
+            onClick={() => {
+              audio.enabled = s.settings.sound;
+              audio.play("matchWin");
+            }}
+          >
+            Test sound
+          </button>
           {(["animations", "reducedMotion", "sound"] as const).map((k) => (
             <label className="toggle" key={k}>
               <span>
@@ -149,7 +165,7 @@ export function Settings({
                   ? "Card animations"
                   : k === "reducedMotion"
                     ? "Reduce motion"
-                    : "Sound effects (ready for future audio)"}
+                    : "Sound effects"}
               </span>
               <input
                 type="checkbox"

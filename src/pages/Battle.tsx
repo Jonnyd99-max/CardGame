@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Swords, ArrowRight, Trophy } from "lucide-react";
 import { characters } from "../data/characters";
+import { battleCharacters } from "../data/enemies";
+import { audio } from "../utils/audio";
 import { progression } from "../data/unlocks";
 import { themes } from "../data/themes";
 import { Card } from "../components/Card";
@@ -47,6 +49,16 @@ export function BattlePage({
   function resolve(stat: (typeof statKeys)[number]) {
     if (!battle || battle.last || battle.result) return;
     const next = playRound(battle, stat, s);
+    audio.enabled = s.settings.sound;
+    audio.play(
+      next.result === "player"
+        ? "matchWin"
+        : next.last?.winner === "player"
+          ? "roundWin"
+          : next.last?.winner === "draw"
+            ? "unlock"
+            : "roundLoss",
+    );
     setBattle(next);
     if (next.result && !paid) {
       setPaid(true);
@@ -201,17 +213,29 @@ export function BattlePage({
       </>
     );
   const pc =
-      characters.find(
+      battleCharacters.find(
         (c) => c.id === (battle.last?.playerId || battle.player[0]),
       ) || characters.find((c) => c.id === battle.participants[0])!,
     ac =
-      characters.find((c) => c.id === (battle.last?.aiId || battle.ai[0])) ||
-      characters[0],
+      battleCharacters.find(
+        (c) => c.id === (battle.last?.aiId || battle.ai[0]),
+      ) || characters[0],
     ps = battleStats(pc.id, statsFor(pc, s), battle.participants, s),
     opponent = opponentStats(battle, ac.baseStats),
     prizes = matchPrizes(battle);
   return (
-    <div className="arena">
+    <div
+      className={`arena ${battle.last ? `impact-${battle.last.winner}` : ""}`}
+    >
+      {battle.last && (
+        <div key={battle.round} className="comic-impact" aria-hidden="true">
+          {battle.last.winner === "player"
+            ? "POW!"
+            : battle.last.winner === "draw"
+              ? "CLASH!"
+              : "WHAM!"}
+        </div>
+      )}
       <div className="arena-header">
         <button className="text-button" onClick={onExit}>
           ← Leave arena

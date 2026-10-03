@@ -32,6 +32,15 @@ export function unlockLevelFor(c: Character, s: Save) {
           c.unlockLevel,
       );
 }
+export function selectUniverse(s: Save, franchise: string) {
+  s.franchise = franchise;
+  const owned = characters.find(
+    (c) => c.franchise === franchise && s.owned.includes(c.id),
+  );
+  const preview = owned || characters.find((c) => c.franchise === franchise)!;
+  s.group = preview.group;
+  if (owned) s.favourite = owned.id;
+}
 export function migrateBalance(s: Save) {
   if (s.balanceVersion === 1) return s;
   s.starterFranchise = s.franchise;

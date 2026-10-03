@@ -10,6 +10,8 @@ import {
 } from "../game/adventures";
 import { playerLevel, validateDeck, items } from "../game/progression";
 import { characters } from "../data/characters";
+import { battleCharacters } from "../data/enemies";
+import { audio } from "../utils/audio";
 import { Artwork, Card } from "../components/Card";
 import { ItemArtwork } from "../components/ItemArtwork";
 import { BattlePage } from "./Battle";
@@ -47,7 +49,7 @@ export function Campaign({
           <p>
             {bosses
               ? "Face escalating boss phases. Unlock bosses by advancing through the campaign."
-              : "Five chapters. One Ranger team. A final showdown with Lord Zedd."}
+              : "Ten chapters across Angel Grove, Marvel, Gotham and the portal dimension."}
           </p>
         </div>
       </div>
@@ -86,7 +88,7 @@ export function Campaign({
                 <div className="chapter-art">
                   <Artwork
                     character={
-                      characters.find((ch) => ch.id === c.opponents[0])!
+                      battleCharacters.find((ch) => ch.id === c.opponents[0])!
                     }
                   />
                   <span className="pill">
@@ -183,9 +185,10 @@ export function Packs({
               Common {p.odds[0]}% · Uncommon {p.odds[1]}% · Rare {p.odds[2]}%
             </p>
             <p>
-              Includes {p.materials} materials. Cards are limited to unlock
-              levels up to two above your current level. If a rarity has no
-              eligible cards, it becomes Common.
+              Includes {p.materials} materials. All four universes are included,
+              using the same card-level limits for each. Cards can unlock up to
+              two levels above your current level. If a rarity has no eligible
+              cards, it becomes Common.
             </p>
             <button
               className="primary"
@@ -202,6 +205,8 @@ export function Packs({
                   openPack(s, p.id, () => rolls[n++]);
                 });
                 setResult(revealed);
+                audio.enabled = save.settings.sound;
+                audio.play("pack");
               }}
             >
               Open {p.name}

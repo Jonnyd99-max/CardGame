@@ -987,6 +987,114 @@ footer {
   }
 }
 /* Campaign chapters and earned-coin packs */
+@media (max-width: 650px) {
+  .app[data-universe] .hero-copy {
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--glow) 92%, #fffaf0) 0%,
+      color-mix(in srgb, var(--glow) 85%, #fffaf0) 57%,
+      transparent 100%
+    ) !important;
+  }
+}
+.app {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--glow) 40%, #fffaf0),
+    #f6f0e3 75%
+  );
+}
+.app .hero {
+  background: radial-gradient(circle at 75% 20%, var(--glow), #fffaf0);
+}
+.app .topbar,
+.app .theme-tag,
+.universe-preview {
+  background: color-mix(in srgb, var(--glow) 45%, #fffaf0);
+}
+.app .hero-copy {
+  background: transparent !important;
+}
+.universe-preview {
+  border: 2px solid var(--accent);
+  padding: 15px;
+  margin: 15px 0;
+}
+.arena {
+  position: relative;
+}
+.comic-impact {
+  position: absolute;
+  top: 115px;
+  left: 50%;
+  z-index: 4;
+  pointer-events: none;
+  font-family: Bangers, cursive;
+  font-size: 72px;
+  color: #ffdc5e;
+  text-shadow:
+    4px 4px #252323,
+    -2px -2px #252323;
+  transform: translateX(-50%) rotate(-10deg);
+  animation: comic-impact 0.9s both;
+}
+.impact-ai .comic-impact {
+  color: #ff7373;
+}
+@keyframes comic-impact {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.2) rotate(-20deg);
+  }
+  25% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.25) rotate(-10deg);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scale(1);
+  }
+}
+.impact-player .battle-layout > .battle-card:first-child {
+  animation: battle-strike 0.4s;
+}
+@keyframes battle-strike {
+  50% {
+    transform: translateX(10px) rotate(2deg);
+  }
+}
+.pack-reveal {
+  animation: pack-reveal 0.6s both;
+}
+@keyframes pack-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(25px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.reduce-motion .comic-impact {
+  display: none;
+}
+.reduce-motion .pack-reveal,
+.reduce-motion .battle-layout > .battle-card {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .comic-impact {
+    display: none;
+  }
+  .pack-reveal,
+  .battle-layout > .battle-card {
+    animation: none !important;
+  }
+}
 .sidebar nav {
   min-height: 0;
   overflow-y: auto;
@@ -1068,7 +1176,7 @@ footer {
   margin: 24px auto;
   text-align: center;
 }
-.pack-reveal .character-card {
+.pack-reveal .battle-card {
   max-width: 280px;
   margin: 18px auto;
 }
@@ -1082,3 +1190,4 @@ footer {
     gap: 10px;
   }
 }
+

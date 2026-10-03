@@ -1,4 +1,5 @@
 import { characters } from "../data/characters";
+import { battleCharacters } from "../data/enemies";
 import { statsFor, grantXP, refreshPeriods } from "./progression";
 import { progression } from "../data/unlocks";
 import { battleStats } from "./adventures";
@@ -152,8 +153,8 @@ export function createBattle(
 export function playRound(b: Battle, stat: Stat, s: Save): Battle {
   if (b.result) return b;
   const next = structuredClone(b);
-  const p = characters.find((c) => c.id === b.player[0])!,
-    a = characters.find((c) => c.id === b.ai[0])!;
+  const p = battleCharacters.find((c) => c.id === b.player[0])!,
+    a = battleCharacters.find((c) => c.id === b.ai[0])!;
   const ps = battleStats(p.id, statsFor(p, s), b.participants, s),
     as = opponentStats(b, a.baseStats);
   const winner = compare(ps[stat], as[stat]);
