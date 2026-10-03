@@ -46,6 +46,8 @@ export interface Battle {
     value?: number;
     shield?: boolean;
     reveal?: boolean;
+    revealStats?: Stat[];
+    evolutionStage?: number;
   };
   bossMemory?: Stat;
   chapter?: string;
@@ -69,6 +71,7 @@ export interface Battle {
     aiId: string;
     enemyStats?: Stats;
     abilityNotices?: AbilityNotice[];
+    chooser?: "player" | "ai";
   };
   log: string[];
   strengthWins: number;
@@ -188,6 +191,7 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
     playerId: p.id,
     aiId: a.id,
     enemyStats: as,
+    chooser: b.turn,
     abilityNotices: abilityNotices(b),
   };
   next.bossMemory = stat;
@@ -321,14 +325,14 @@ export function abilityNotices(b: Battle): AbilityNotice[] {
     notices.push({
       title: `${name} uses ${abilityName(a.character)}!`,
       description: a.reveal
-        ? `Opponent ${a.stat} is revealed this round.`
+        ? `Opponent ${(a.revealStats || [a.stat]).join(", ")} revealed this round.`
         : a.shield
-          ? "Your durability gains +12 and combat gains +6 this round (maximum 100)."
+          ? `Your durability gains +${12 + (a.evolutionStage || 0) * 2} and combat gains +${6 + (a.evolutionStage || 0) * 2} this round (maximum 100).`
           : a.value !== undefined
             ? `Your ${a.stat} is rerolled to ${a.value} this round.`
-            : `Your ${a.stat} gains +8 this round (maximum 100).`,
+            : `Your ${a.stat} gains +${8 + (a.evolutionStage || 0) * 2} this round (maximum 100).`,
       side: "player",
-      stats: a.shield ? ["durability", "combat"] : [a.stat],
+      stats: a.shield ? ["durability", "combat"] : a.revealStats || [a.stat],
     });
   }
   return notices;
@@ -337,6 +341,7 @@ export function activateAbility(
   b: Battle,
   stat: Stat,
   rng = Math.random,
+  evolutionStage = 0,
 ): Battle {
   const id = b.player[0];
   if (
@@ -347,15 +352,30 @@ export function activateAbility(
   )
     return b;
   const next = structuredClone(b);
+  const stage = Math.max(0, Math.min(2, Math.floor(evolutionStage)));
   (next.usedAbilities ||= []).push(id);
   next.abilityRound = {
     round: b.round,
     character: id,
     stat,
+    evolutionStage: stage,
     ...(id === "rick-6"
-      ? { value: 70 + Math.floor(Math.max(0, Math.min(0.999999, rng())) * 31) }
+      ? {
+          value:
+            70 +
+            stage * 5 +
+            Math.floor(
+              Math.max(0, Math.min(0.999999, rng())) * (31 - stage * 5),
+            ),
+        }
       : id === "dc-0"
-        ? { reveal: true }
+        ? {
+            reveal: true,
+            revealStats: [
+              stat,
+              ...statKeys.filter((k) => k !== stat).slice(0, stage),
+            ],
+          }
         : id === "rangers-6"
           ? { shield: true }
           : {}),
@@ -374,9 +394,18 @@ export function combatStats(b: Battle, id: string, base: Stats): Stats {
   const a = b.abilityRound;
   if (a && a.round === round && a.character === id && !a.reveal) {
     if (a.shield) {
-      values.durability = Math.min(100, values.durability + 12);
-      values.combat = Math.min(100, values.combat + 6);
-    } else values[a.stat] = a.value ?? Math.min(100, values[a.stat] + 8);
+      values.durability = Math.min(
+        100,
+        values.durability + 12 + (a.evolutionStage || 0) * 2,
+      );
+      values.combat = Math.min(
+        100,
+        values.combat + 6 + (a.evolutionStage || 0) * 2,
+      );
+    } else
+      values[a.stat] =
+        a.value ??
+        Math.min(100, values[a.stat] + 8 + (a.evolutionStage || 0) * 2);
   }
   return values;
 }

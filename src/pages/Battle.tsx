@@ -6,6 +6,8 @@ import { audio } from "../utils/audio";
 import { progression } from "../data/unlocks";
 import { themes } from "../data/themes";
 import { Card } from "../components/Card";
+import { BattleEffects } from "../components/BattleEffects";
+import { evolutionFor } from "../game/evolution";
 import {
   createBattle,
   playRound,
@@ -361,12 +363,12 @@ export function BattlePage({
               <h3>{abilityName(pc.id)}</h3>
               <p>
                 {pc.id === "rick-6"
-                  ? "Reroll one stat to 70–100. It may become lower."
+                  ? `Reroll one stat to ${70 + evolutionFor(pc, s).stage * 5}–100. It may become lower.`
                   : pc.id === "dc-0"
-                    ? "Reveal one enemy stat before attacking."
+                    ? `Reveal ${1 + evolutionFor(pc, s).stage} enemy stats before attacking.`
                     : pc.id === "rangers-6"
-                      ? "+12 durability and +6 combat this round."
-                      : "+8 to one stat this round."}{" "}
+                      ? `+${12 + evolutionFor(pc, s).stage * 2} durability and +${6 + evolutionFor(pc, s).stage * 2} combat this round.`
+                      : `+${8 + evolutionFor(pc, s).stage * 2} to one stat this round.`}{" "}
                 One ability use for your whole team per fight.
               </p>
               <label>
@@ -389,7 +391,14 @@ export function BattlePage({
                   (battle.usedAbilities?.length || 0) > 0
                 }
                 onClick={() => {
-                  setBattle(activateAbility(battle, abilityStat));
+                  setBattle(
+                    activateAbility(
+                      battle,
+                      abilityStat,
+                      Math.random,
+                      evolutionFor(pc, s).stage,
+                    ),
+                  );
                   audio.play("energy");
                 }}
               >
@@ -429,7 +438,11 @@ export function BattlePage({
                   battle.last ||
                   (battle.abilityRound?.round === battle.round &&
                     battle.abilityRound.reveal &&
-                    battle.abilityRound.stat === k)
+                    (
+                      battle.abilityRound.revealStats || [
+                        battle.abilityRound.stat,
+                      ]
+                    ).includes(k))
                     ? undefined
                     : "Opponent stat hidden"
                 }
@@ -437,7 +450,11 @@ export function BattlePage({
                 {battle.last ||
                 (battle.abilityRound?.round === battle.round &&
                   battle.abilityRound.reveal &&
-                  battle.abilityRound.stat === k)
+                  (
+                    battle.abilityRound.revealStats || [
+                      battle.abilityRound.stat,
+                    ]
+                  ).includes(k))
                   ? opponent[k]
                   : "?"}
               </b>
@@ -487,6 +504,7 @@ export function BattlePage({
           hideStats={!battle.last}
           battleValues={opponent}
         />
+        <BattleEffects battle={battle} />
       </div>
       {battle.result && (
         <section className={`match-result ${battle.result}`}>

@@ -17,6 +17,7 @@ import {
   toggleEquipment,
 } from "../game/progression";
 import { statKeys, type Save } from "../types";
+import { evolutionFor } from "../game/evolution";
 export function CharacterDetail({
   id,
   save: s,
@@ -54,6 +55,10 @@ export function CharacterDetail({
       x.upgrades++;
     });
     notify(`${c.name} reached level ${p.level + 1}`);
+    if (p.level + 1 === 5 || p.level + 1 === 10)
+      notify(
+        `${c.name} evolved! A new form and stronger fight ability are unlocked.`,
+      );
   }
   return (
     <div className="detail-layout">
@@ -70,6 +75,23 @@ export function CharacterDetail({
         </span>
         <h1>{c.name}</h1>
         <p className="muted">{c.description}</p>
+        <div className="panel evolution-panel">
+          <h2>Evolution · {evolutionFor(c, s).name}</h2>
+          <p>
+            Card level 5 unlocks evolution I. Level 10 unlocks evolution II.
+            Train and upgrade this card to evolve automatically.
+          </p>
+          <p>
+            Each evolution adds +2 to focus and shield bonuses. Rick’s reroll
+            minimum rises by 5; Batman reveals one extra stat. Your team still
+            gets only one ability per fight.
+          </p>
+          <p>
+            {evolutionFor(c, s).nextLevel
+              ? `Next form at card level ${evolutionFor(c, s).nextLevel}.`
+              : "Final form unlocked!"}
+          </p>
+        </div>
         {!owned ? (
           <div className="panel">
             <Lock /> Unlocks at player level {unlockLevelFor(c, s)}. Current

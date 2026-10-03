@@ -6,6 +6,7 @@ import type { Character, Save, Stats } from "../types";
 import { items } from "../game/progression";
 import { ItemArtwork } from "./ItemArtwork";
 import { assetUrl } from "../game/assetUrl";
+import { evolutionFor } from "../game/evolution";
 export function Artwork({ character: c }: { character: Character }) {
   if (c.image && c.imageSheet) {
     const { columns, rows, index } = c.imageSheet;
@@ -109,6 +110,7 @@ export function Card({
   battleValues?: Stats;
 }) {
   const p = s.cards[c.id];
+  const evolution = evolutionFor(c, s);
   const stats = battleValues || statsFor(c, s);
   const loadout = locked
     ? []
@@ -121,7 +123,7 @@ export function Card({
         );
   return (
     <button
-      className={`battle-card ${compact ? "compact" : ""} ${locked ? "locked" : ""} ${p?.style === "holographic" ? "holo" : ""}`}
+      className={`battle-card evolution-${evolution.stage} ${compact ? "compact" : ""} ${locked ? "locked" : ""} ${p?.style === "holographic" ? "holo" : ""}`}
       style={
         {
           "--card-color": c.color,
@@ -148,6 +150,11 @@ export function Card({
       </div>
       <div className="card-art">
         <Artwork character={c} />
+        {!!evolution.stage && (
+          <div className="evolution-crest">
+            {evolution.stage === 2 ? "★★" : "★"} {evolution.name}
+          </div>
+        )}
         {!!loadout.length && (
           <div className="card-loadout" aria-label="Equipped loadout">
             {loadout.map((item) => (
