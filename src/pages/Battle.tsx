@@ -27,6 +27,7 @@ import {
   rangerBonus,
   chapters,
   campaignStars,
+  villainRewards,
 } from "../game/adventures";
 import { statKeys, type Save, type Mode, type Difficulty } from "../types";
 export function BattlePage({
@@ -544,6 +545,20 @@ export function BattlePage({
           )}
           {battle.chapter && battle.result === "player" && (
             <p>
+              {villainRewards[battle.chapter] && (
+                <>
+                  <strong>
+                    Villain card earned:{" "}
+                    {
+                      characters.find(
+                        (c) => c.id === villainRewards[battle.chapter!],
+                      )?.name
+                    }
+                    !
+                  </strong>
+                  <br />
+                </>
+              )}
               {chapterAlreadyCleared
                 ? "Replay complete. First-clear prizes were already claimed."
                 : (() => {

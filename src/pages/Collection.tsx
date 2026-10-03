@@ -46,7 +46,10 @@ export function Collection({
         <div>
           <span className="eyebrow">BUILD YOUR LEGACY</span>
           <h1>
-            My collection <em>{save.owned.length}/32</em>
+            My collection{" "}
+            <em>
+              {save.owned.length}/{characters.length}
+            </em>
           </h1>
           <p>Meet your legends. Discover your next obsession.</p>
         </div>

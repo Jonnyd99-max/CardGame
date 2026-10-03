@@ -18,6 +18,8 @@ import {
 } from "../game/progression";
 import { statKeys, type Save } from "../types";
 import { evolutionFor } from "../game/evolution";
+import { villainChapter } from "../game/villains";
+import { chapters } from "../game/adventures";
 export function CharacterDetail({
   id,
   save: s,
@@ -94,8 +96,10 @@ export function CharacterDetail({
         </div>
         {!owned ? (
           <div className="panel">
-            <Lock /> Unlocks at player level {unlockLevelFor(c, s)}. Current
-            level: {playerLevel(s.xp)}.
+            <Lock />{" "}
+            {villainChapter(c.id)
+              ? `Win “${chapters.find((ch) => ch.id === villainChapter(c.id))?.name}” to collect this villain. Replays count.`
+              : `Unlocks at player level ${unlockLevelFor(c, s)}. Current level: ${playerLevel(s.xp)}.`}
             {s.cards[id] && (
               <p>
                 Your earlier training and upgrades are saved for when this card

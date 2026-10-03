@@ -143,6 +143,8 @@ export const chapters = [
   },
 ] as const;
 export type Chapter = (typeof chapters)[number];
+import { villainRewards } from "./villains";
+export { villainRewards } from "./villains";
 export function chapterAvailable(s: Save, id: string) {
   const i = chapters.findIndex((c) => c.id === id);
   return (
@@ -175,6 +177,11 @@ export function claimChapter(s: Save, b: Battle) {
   if (b.result !== "player" || !b.chapter || !chapterAvailable(s, b.chapter))
     return false;
   const stage = chapters.find((c) => c.id === b.chapter)!;
+  const villain = villainRewards[stage.id];
+  if (villain && !s.owned.includes(villain)) {
+    s.owned.push(villain);
+    s.cards[villain] ||= cardProgress();
+  }
   const stars = campaignStars(b);
   const earned = Math.max(0, stars - (s.campaignStars?.[stage.id] || 0));
   if (earned) {
@@ -263,6 +270,7 @@ export function openPack(
     return null;
   const eligible = characters.filter(
     (c) =>
+      !c.tags.includes("campaign-reward") &&
       c.unlockLevel <= playerLevel(s.xp) + 2 &&
       ["Common", "Uncommon", "Rare"].includes(c.rarity),
   );

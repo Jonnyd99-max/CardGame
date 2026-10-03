@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { characters } from "./characters";
+import { characters, heroes } from "./characters";
 import { characterStats } from "./characterStats";
 import { statKeys } from "../types";
 
@@ -8,7 +8,7 @@ const stats = (name: string) =>
 describe("character-specific stat balance", () => {
   it("provides a complete valid profile for every character", () => {
     expect(Object.keys(characterStats).sort()).toEqual(
-      characters.map((c) => c.id).sort(),
+      heroes.map((c) => c.id).sort(),
     );
     for (const c of characters) {
       expect(Object.keys(c.baseStats).sort()).toEqual([...statKeys].sort());

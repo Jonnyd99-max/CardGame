@@ -71,7 +71,7 @@ export function Home({
             <Swords size={19} /> Enter the battle <ArrowUpRight size={19} />
           </button>
           <div className="hero-meta">
-            <span>32 unique characters</span>
+            <span>{characters.length} unique characters</span>
             <i /> <span>4 iconic universes</span>
           </div>
         </div>

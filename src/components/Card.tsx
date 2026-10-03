@@ -6,7 +6,8 @@ import type { Character, Save, Stats } from "../types";
 import { items } from "../game/progression";
 import { ItemArtwork } from "./ItemArtwork";
 import { assetUrl } from "../game/assetUrl";
-import { evolutionFor } from "../game/evolution";
+import { evolutionFor, evolvedArtwork } from "../game/evolution";
+import { villainChapter } from "../game/villains";
 export function Artwork({ character: c }: { character: Character }) {
   if (c.image && c.imageSheet) {
     const { columns, rows, index } = c.imageSheet;
@@ -149,7 +150,7 @@ export function Card({
         </span>
       </div>
       <div className="card-art">
-        <Artwork character={c} />
+        <Artwork character={evolvedArtwork(c, evolution.stage)} />
         {!!evolution.stage && (
           <div className="evolution-crest">
             {evolution.stage === 2 ? "★★" : "★"} {evolution.name}
@@ -172,7 +173,11 @@ export function Card({
         {locked && (
           <div className="lock-label">
             <Lock size={25} />
-            <span>Unlock at level {unlockLevelFor(c, s)}</span>
+            <span>
+              {villainChapter(c.id)
+                ? "Win its campaign chapter to collect"
+                : `Unlock at level ${unlockLevelFor(c, s)}`}
+            </span>
           </div>
         )}
         {!hideStats && (

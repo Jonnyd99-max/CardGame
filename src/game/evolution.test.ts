@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { characters } from "../data/characters";
 import { newSave, parseSave } from "../state/save";
-import { evolutionFor } from "./evolution";
+import { evolutionFor, evolvedArtwork } from "./evolution";
 import {
   activateAbility,
   combatStats,
@@ -52,4 +52,25 @@ it("strengthens evolved abilities without giving extra activations", () => {
   const scan = activateAbility({ ...b, player: ["dc-0"] }, "tech", () => 0, 2);
   expect(new Set(scan.abilityRound?.revealStats).size).toBe(3);
   expect(scan.abilityRound?.revealStats).toContain("tech");
+});
+it("uses generated portraits where available and preserves existing artwork elsewhere", () => {
+  for (const c of characters) {
+    expect(evolvedArtwork(c, 0)).toBe(c);
+    const first = evolvedArtwork(c, 1),
+      final = evolvedArtwork(c, 2);
+    if (
+      c.id.startsWith("enemy-") ||
+      !["rangers", "rick"].includes(c.franchise)
+    ) {
+      expect(first).toBe(c);
+      expect(final).toBe(c);
+      continue;
+    }
+    expect(first.image).toMatch(
+      /evolution-(rangers|marvel|dc|rick|villains)\.png$/,
+    );
+    expect(first.imageSheet?.index).toBeGreaterThanOrEqual(0);
+    expect(final.imageSheet?.index).toBe((first.imageSheet?.index || 0) + 8);
+    expect(final.imageSheet?.index).toBeLessThan(16);
+  }
 });

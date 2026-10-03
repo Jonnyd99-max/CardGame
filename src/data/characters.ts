@@ -91,7 +91,7 @@ const colors = [
   "#b4c9df",
   "#ab6fde",
 ];
-export const characters: Character[] = entries.map(
+export const heroes: Character[] = entries.map(
   ([franchise, group, name, description], i) => {
     const n = i % 8;
     const baseStats = { ...characterStats[`${franchise}-${n}`] };
@@ -149,3 +149,36 @@ export const characters: Character[] = entries.map(
     };
   },
 );
+const villainDefinitions: [string, string, string, number[]][] = [
+  ["rita", "Rita Repulsa", "rangers", [35, 42, 90, 52, 61, 90, 96, 55]],
+  ["goldar", "Goldar", "rangers", [89, 62, 48, 88, 85, 76, 72, 30]],
+  ["putty", "Putty Patrol", "rangers", [48, 48, 20, 44, 52, 30, 35, 15]],
+  ["goblin", "Green Goblin", "marvel", [68, 76, 91, 78, 66, 74, 72, 93]],
+  ["ultron", "Ultron", "marvel", [92, 72, 98, 86, 96, 94, 84, 99]],
+  ["joker", "The Joker", "dc", [32, 48, 95, 65, 42, 45, 89, 76]],
+  ["harley", "Harley Quinn", "dc", [46, 86, 76, 89, 55, 38, 73, 52]],
+];
+export const villains: Character[] = villainDefinitions.map(
+  ([id, name, franchise, values], index) => ({
+    ...heroes.find((c) => c.franchise === franchise)!,
+    id: `enemy-${id}`,
+    name,
+    franchise,
+    description:
+      "Campaign trophy card. Earn this villain by winning its chapter, then train and equip it for your own team.",
+    image:
+      index < 3
+        ? "/artwork/ranger-enemies-atlas.png"
+        : `/artwork/enemy-${id}.${franchise === "dc" ? "jpg" : "png"}`,
+    imageSheet: index < 3 ? { columns: 3, rows: 1, index } : undefined,
+    baseStats: Object.fromEntries(
+      statKeys.map((k, i) => [k, values[i]]),
+    ) as Stats,
+    rarity: index === 2 ? "Common" : "Epic",
+    unlockLevel: 101,
+    tags: ["villain", "campaign-reward"],
+    compatibleWeapons: ["pulse-blade", "blaster"],
+    compatibleEquipment: ["shield", "scanner"],
+  }),
+);
+export const characters = [...heroes, ...villains];

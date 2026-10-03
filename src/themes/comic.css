@@ -1422,3 +1422,25 @@ footer {
     top: 25%;
   }
 }
+.update-prompt {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  z-index: 100;
+  max-width: 380px;
+  width: calc(100% - 36px);
+  border: 3px solid #252323;
+  background: #fff0a6;
+  padding: 18px;
+  box-shadow: 5px 5px #252323;
+}
+.update-prompt strong {
+  font-family: Bangers, cursive;
+  font-size: 28px;
+}
+.update-prompt p {
+  color: #252323;
+}
+.update-prompt .text-button {
+  margin-left: 12px;
+}

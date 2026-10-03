@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   chapters,
+  villainRewards,
   chapterAvailable,
   campaignBattle,
   rangerBonus,
@@ -103,6 +104,19 @@ export function Campaign({
                   {"☆".repeat(3 - (save.campaignStars?.[c.id] || 0))}
                 </p>
                 <p>{c.story}</p>
+                {villainRewards[c.id] && (
+                  <p className="tip">
+                    Villain card:{" "}
+                    {
+                      characters.find((ch) => ch.id === villainRewards[c.id])
+                        ?.name
+                    }{" "}
+                    ·{" "}
+                    {save.owned.includes(villainRewards[c.id])
+                      ? "Collected"
+                      : "Win this chapter to collect (replays count)."}
+                  </p>
+                )}
                 <p>
                   Level {c.level} ·{" "}
                   {c.boss
