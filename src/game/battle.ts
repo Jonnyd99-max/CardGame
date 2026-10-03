@@ -35,6 +35,16 @@ export function aiStat(
   )[0];
 }
 export interface Battle {
+  usedAbilities?: string[];
+  abilityRound?: {
+    round: number;
+    character: string;
+    stat: Stat;
+    value?: number;
+    shield?: boolean;
+    reveal?: boolean;
+  };
+  bossMemory?: Stat;
   chapter?: string;
   boss?: boolean;
   mode: Mode;
@@ -54,6 +64,7 @@ export interface Battle {
     winner: string;
     playerId: string;
     aiId: string;
+    enemyStats?: Stats;
   };
   log: string[];
   strengthWins: number;
@@ -155,7 +166,11 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
   const next = structuredClone(b);
   const p = battleCharacters.find((c) => c.id === b.player[0])!,
     a = battleCharacters.find((c) => c.id === b.ai[0])!;
-  const ps = battleStats(p.id, statsFor(p, s), b.participants, s),
+  const ps = combatStats(
+      b,
+      p.id,
+      battleStats(p.id, statsFor(p, s), b.participants, s),
+    ),
     as = opponentStats(b, a.baseStats);
   const winner = compare(ps[stat], as[stat]);
   next.round++;
@@ -166,7 +181,9 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
     winner,
     playerId: p.id,
     aiId: a.id,
+    enemyStats: as,
   };
+  next.bossMemory = stat;
   next.log.unshift(
     `${p.name} ${ps[stat]} · ${a.name} ${as[stat]} — ${stat}: ${winner === "draw" ? "tie" : winner === "player" ? "you win" : "opponent wins"}`,
   );
@@ -216,9 +233,69 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
 }
 export function opponentStats(b: Battle, base: Stats): Stats {
   const phase = b.boss ? Math.min(2, Math.floor(b.round / 3)) : 0;
-  return Object.fromEntries(
+  const values = Object.fromEntries(
     statKeys.map((k) => [k, Math.min(100, base[k] + phase * 3)]),
   ) as Stats;
+  if (b.chapter === "ultron" && b.bossMemory)
+    values[b.bossMemory] = Math.min(100, values[b.bossMemory] + 10);
+  if (b.chapter === "joker" && b.round % 2 === 1)
+    [values.power, values.intelligence] = [values.intelligence, values.power];
+  return values;
+}
+export function abilityName(id: string) {
+  return id === "rick-6"
+    ? "Portal recalibration"
+    : id === "dc-0"
+      ? "Detective scan"
+      : id === "rangers-6"
+        ? "Dragon Shield"
+        : "Signature focus";
+}
+export function activateAbility(
+  b: Battle,
+  stat: Stat,
+  rng = Math.random,
+): Battle {
+  const id = b.player[0];
+  if (
+    b.last ||
+    b.result ||
+    b.turn !== "player" ||
+    b.usedAbilities?.includes(id)
+  )
+    return b;
+  const next = structuredClone(b);
+  (next.usedAbilities ||= []).push(id);
+  next.abilityRound = {
+    round: b.round,
+    character: id,
+    stat,
+    ...(id === "rick-6"
+      ? { value: 70 + Math.floor(Math.max(0, Math.min(0.999999, rng())) * 31) }
+      : id === "dc-0"
+        ? { reveal: true }
+        : id === "rangers-6"
+          ? { shield: true }
+          : {}),
+  };
+  next.log.unshift(`${abilityName(id)} activated for ${stat}.`);
+  return next;
+}
+export function combatStats(b: Battle, id: string, base: Stats): Stats {
+  const values = { ...base };
+  const round = b.last ? b.round - 1 : b.round;
+  if (b.chapter === "titan") {
+    const cursed = statKeys[round % statKeys.length];
+    values[cursed] = Math.max(1, values[cursed] - 8);
+  }
+  const a = b.abilityRound;
+  if (a && a.round === round && a.character === id && !a.reveal) {
+    if (a.shield) {
+      values.durability = Math.min(100, values.durability + 12);
+      values.combat = Math.min(100, values.combat + 6);
+    } else values[a.stat] = a.value ?? Math.min(100, values[a.stat] + 8);
+  }
+  return values;
 }
 export function rewardMatch(s: Save, b: Battle) {
   if (!b.result) return s;

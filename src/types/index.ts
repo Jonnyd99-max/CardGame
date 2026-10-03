@@ -72,6 +72,7 @@ export interface Deck {
 }
 export interface Save {
   campaign?: string[];
+  campaignStars?: Record<string, number>;
   packsOpened?: number;
   balanceVersion?: number;
   starterFranchise?: string;

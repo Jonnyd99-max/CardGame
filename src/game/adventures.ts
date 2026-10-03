@@ -175,6 +175,13 @@ export function claimChapter(s: Save, b: Battle) {
   if (b.result !== "player" || !b.chapter || !chapterAvailable(s, b.chapter))
     return false;
   const stage = chapters.find((c) => c.id === b.chapter)!;
+  const stars = campaignStars(b);
+  const earned = Math.max(0, stars - (s.campaignStars?.[stage.id] || 0));
+  if (earned) {
+    (s.campaignStars ||= {})[stage.id] = stars;
+    s.coins += earned * 50;
+    s.materials += earned;
+  }
   if (s.campaign?.includes(stage.id)) return false;
   (s.campaign ||= []).push(stage.id);
   s.coins += stage.coins;
@@ -186,6 +193,14 @@ export function claimChapter(s: Save, b: Battle) {
   }
   grantXP(s, stage.xp);
   return true;
+}
+export function campaignStars(b: Battle) {
+  if (!b.chapter || b.result !== "player") return 0;
+  return b.round > 0 && b.scores[0] === b.round
+    ? 3
+    : b.round > 0 && b.scores[0] / b.round >= 0.75
+      ? 2
+      : 1;
 }
 export function rangerBonus(ids: string[], s: Save) {
   const rangers = [...new Set(ids)].filter((id) => rangerWeapons[id]);

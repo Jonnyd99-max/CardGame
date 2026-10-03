@@ -176,6 +176,14 @@ export function parseSave(raw: string): Save {
   if (s.owned.some((id) => !s.cards[id])) fail();
   if (s.packsOpened !== undefined && !integer(s.packsOpened)) fail();
   if (
+    s.campaignStars !== undefined &&
+    (!record(s.campaignStars) ||
+      !Object.entries(s.campaignStars).every(
+        ([id, n]) => s.campaign?.includes(id) && integer(n, 3) && n >= 1,
+      ))
+  )
+    fail();
+  if (
     s.campaign !== undefined &&
     (!stringArray(s.campaign) ||
       new Set(s.campaign).size !== s.campaign.length ||

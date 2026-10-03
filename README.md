@@ -102,6 +102,13 @@ Ranger synergy uses unique Rangers in the participating deck, excluding Lord Zed
 
 Scout packs cost 180 earned coins (level 1, 75% Common / 25% Uncommon). Hero packs cost 350 (level 5, 45% Common / 35% Uncommon / 20% Rare). Each contains one card and 1 or 2 materials. Every universe uses the same base card unlock levels for packs; cards at most two levels above the player level are eligible; unavailable rarity pools fall back to Common. No Epic/Legendary/Mythic cards are in packs. Duplicates give 25% coin refunds, 2 extra materials and 20 card XP. Randomness is local; no real-money purchases.
 
+## Battle tactics and campaign mastery
+
+Each participating character has one ability use per match, activated on the player's turn before choosing an attack. Rick recalibrates a selected stat to 70–100 (may lower it); Batman reveals one chosen opponent attribute; Green Ranger gains 12 durability and 6 combat for the current round; other characters focus a selected stat for +8. Temporary effects cap at 100 and expire next round. Rita curses a rotating attribute for -8, Ultron adapts to the previous round's stat for +10, and Joker swaps power/intelligence every other round. Revealed enemy values are saved with the round result so later adaptations do not change the reported outcome.
+
+Campaign wins earn 1–3 stars: 1 for victory, 2 for at least 75% rounds won, 3 for a clean sweep. Only increases in a chapter's best rating pay mastery rewards (50 coins and 1 material per new star). Ratings persist across reload/import and old cleared chapters remain cleared; replay them to earn stars. No rewards for an unfinished battle or loss. First-clear rewards are separate and remain one-time.
+
 ## Next development
 
 The intended extension points support online accounts/cloud saves, authoritative multiplayer, tournaments, seasons, leaderboards, trading, richer animation/audio, mobile packaging and a backend admin catalogue. Add schema migration before changing the save contract. Before any public release, review character-name/franchise permissions and supply licensed artwork, balance long-term progression and test target mobile install behaviour.
+

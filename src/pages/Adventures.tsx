@@ -98,6 +98,10 @@ export function Campaign({
                   </span>
                 </div>
                 <h2>{c.name}</h2>
+                <p aria-label={`${save.campaignStars?.[c.id] || 0} of 3 stars`}>
+                  {"★".repeat(save.campaignStars?.[c.id] || 0)}
+                  {"☆".repeat(3 - (save.campaignStars?.[c.id] || 0))}
+                </p>
                 <p>{c.story}</p>
                 <p>
                   Level {c.level} ·{" "}
@@ -147,8 +151,11 @@ export function Campaign({
           })}
       </div>
       <p className="tip">
-        Opponent stats remain hidden until each fight resolves. Leaving a battle
-        grants no prizes. You can retry a lost chapter.
+        Earn 1 star for a victory, 2 for winning at least 75% of played rounds,
+        and 3 for a clean sweep. Every new best star earns 50 coins and 1
+        material once. Opponent stats remain hidden until each fight resolves,
+        except a detective scan. Leaving a battle grants no prizes. You can
+        retry a lost chapter.
       </p>
     </>
   );

@@ -12,10 +12,18 @@ import {
   aiStat,
   matchPrizes,
   opponentStats,
+  activateAbility,
+  abilityName,
+  combatStats,
   type Battle as Match,
 } from "../game/battle";
 import { statsFor, validateDeck } from "../game/progression";
-import { battleStats, rangerBonus, chapters } from "../game/adventures";
+import {
+  battleStats,
+  rangerBonus,
+  chapters,
+  campaignStars,
+} from "../game/adventures";
 import { statKeys, type Save, type Mode, type Difficulty } from "../types";
 export function BattlePage({
   save: s,
@@ -46,6 +54,8 @@ export function BattlePage({
     () =>
       !!initialBattle?.chapter && !!s.campaign?.includes(initialBattle.chapter),
   );
+  const [abilityStat, setAbilityStat] =
+    useState<(typeof statKeys)[number]>("combat");
   function resolve(stat: (typeof statKeys)[number]) {
     if (!battle || battle.last || battle.result) return;
     const next = playRound(battle, stat, s);
@@ -230,8 +240,12 @@ export function BattlePage({
       battleCharacters.find(
         (c) => c.id === (battle.last?.aiId || battle.ai[0]),
       ) || characters[0],
-    ps = battleStats(pc.id, statsFor(pc, s), battle.participants, s),
-    opponent = opponentStats(battle, ac.baseStats),
+    ps = combatStats(
+      battle,
+      pc.id,
+      battleStats(pc.id, statsFor(pc, s), battle.participants, s),
+    ),
+    opponent = battle.last?.enemyStats || opponentStats(battle, ac.baseStats),
     prizes = matchPrizes(battle);
   return (
     <div
@@ -317,6 +331,66 @@ export function BattlePage({
           battleValues={ps}
         />
         <div className="stat-choices">
+          {!battle.last && !battle.result && (
+            <div className="panel">
+              <h3>{abilityName(pc.id)}</h3>
+              <p>
+                {pc.id === "rick-6"
+                  ? "Reroll one stat to 70–100. It may become lower."
+                  : pc.id === "dc-0"
+                    ? "Reveal one enemy stat before attacking."
+                    : pc.id === "rangers-6"
+                      ? "+12 durability and +6 combat this round."
+                      : "+8 to one stat this round."}{" "}
+                One use per character per match.
+              </p>
+              <label>
+                Ability stat
+                <select
+                  value={abilityStat}
+                  onChange={(e) =>
+                    setAbilityStat(e.target.value as (typeof statKeys)[number])
+                  }
+                >
+                  {statKeys.map((k) => (
+                    <option key={k}>{k}</option>
+                  ))}
+                </select>
+              </label>
+              <button
+                className="secondary"
+                disabled={
+                  battle.turn !== "player" ||
+                  battle.usedAbilities?.includes(pc.id)
+                }
+                onClick={() => {
+                  setBattle(activateAbility(battle, abilityStat));
+                  audio.play("energy");
+                }}
+              >
+                {battle.usedAbilities?.includes(pc.id)
+                  ? "Ability used"
+                  : "Activate ability"}
+              </button>
+            </div>
+          )}
+          {battle.chapter === "titan" && (
+            <p className="tip">
+              Rita’s spell: −8{" "}
+              {statKeys[(battle.last ? battle.round - 1 : battle.round) % 8]}{" "}
+              this round.
+            </p>
+          )}
+          {battle.chapter === "ultron" && (
+            <p className="tip">
+              Ultron adapts: +10 defence against your previous stat choice.
+            </p>
+          )}
+          {battle.chapter === "joker" && (
+            <p className="tip">
+              Joker swaps power and intelligence every other round.
+            </p>
+          )}
           <span className="eyebrow">
             {battle.last ? "ROUND REVEALED" : "SELECT YOUR STRONGEST STAT"}
           </span>
@@ -331,15 +405,21 @@ export function BattlePage({
             >
               <strong>{ps[k]}</strong>
               <span>{k === "special" ? "Special ability" : k}</span>
-              <b aria-label={battle.last ? undefined : "Opponent stat hidden"}>
-                {battle.last
-                  ? Math.min(
-                      100,
-                      ac.baseStats[k] +
-                        (battle.boss
-                          ? Math.min(2, Math.floor((battle.round - 1) / 3)) * 3
-                          : 0),
-                    )
+              <b
+                aria-label={
+                  battle.last ||
+                  (battle.abilityRound?.round === battle.round &&
+                    battle.abilityRound.reveal &&
+                    battle.abilityRound.stat === k)
+                    ? undefined
+                    : "Opponent stat hidden"
+                }
+              >
+                {battle.last ||
+                (battle.abilityRound?.round === battle.round &&
+                  battle.abilityRound.reveal &&
+                  battle.abilityRound.stat === k)
+                  ? opponent[k]
                   : "?"}
               </b>
             </button>
@@ -378,16 +458,23 @@ export function BattlePage({
           character={ac}
           save={{ ...s, cards: {}, favourite: "" }}
           hideStats={!battle.last}
-          battleValues={opponentStats(
-            { ...battle, round: battle.last ? battle.round - 1 : battle.round },
-            ac.baseStats,
-          )}
+          battleValues={opponent}
         />
       </div>
       {battle.result && (
         <section className={`match-result ${battle.result}`}>
           <Trophy size={44} />
           <span className="eyebrow">MATCH COMPLETE</span>
+          {battle.chapter && (
+            <p>
+              <strong>
+                {"★".repeat(campaignStars(battle))}
+                {"☆".repeat(3 - campaignStars(battle))} · Campaign rating
+              </strong>
+              <br />
+              New best stars award 50 coins and 1 material each, once.
+            </p>
+          )}
           <h1>
             {battle.result === "player"
               ? "Victory is yours."
