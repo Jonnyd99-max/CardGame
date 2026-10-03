@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Swords, ArrowRight, Trophy } from "lucide-react";
 import { characters } from "../data/characters";
 import { battleCharacters } from "../data/enemies";
@@ -61,36 +61,54 @@ export function BattlePage({
   );
   const [abilityStat, setAbilityStat] =
     useState<(typeof statKeys)[number]>("combat");
-  function resolve(stat: (typeof statKeys)[number]) {
-    if (!battle || battle.last || battle.result) return;
-    const next = playRound(battle, stat, s);
-    if (next === battle) return;
-    audio.enabled = s.settings.sound;
-    const attackSound =
-      stat === "tech"
-        ? "blaster"
-        : stat === "speed"
-          ? "whoosh"
-          : stat === "special" || stat === "power"
-            ? "energy"
-            : "impact";
-    const resultSound =
-      next.result === "player"
-        ? "matchWin"
-        : next.result === "ai"
-          ? "matchLoss"
-          : next.last?.winner === "player"
-            ? "roundWin"
-            : next.last?.winner === "draw"
-              ? "draw"
-              : "roundLoss";
-    void audio.play(attackSound).then(() => audio.play(resultSound, 0.35));
-    setBattle(next);
-    if (next.result && !paid) {
-      setPaid(true);
-      onComplete(next);
-    }
-  }
+  const resolve = useCallback(
+    (stat: (typeof statKeys)[number]) => {
+      if (!battle || battle.last || battle.result) return;
+      const next = playRound(battle, stat, s);
+      if (next === battle) return;
+      audio.enabled = s.settings.sound;
+      const attackSound =
+        stat === "tech"
+          ? "blaster"
+          : stat === "speed"
+            ? "whoosh"
+            : stat === "special" || stat === "power"
+              ? "energy"
+              : "impact";
+      const resultSound =
+        next.result === "player"
+          ? "matchWin"
+          : next.result === "ai"
+            ? "matchLoss"
+            : next.last?.winner === "player"
+              ? "roundWin"
+              : next.last?.winner === "draw"
+                ? "draw"
+                : "roundLoss";
+      void audio.play(attackSound).then(() => audio.play(resultSound, 0.35));
+      setBattle(next);
+      if (next.result && !paid) {
+        setPaid(true);
+        onComplete(next);
+      }
+    },
+    [battle, s, paid, onComplete],
+  );
+  useEffect(() => {
+    if (!battle || battle.turn !== "ai" || battle.last || battle.result) return;
+    const timer = window.setTimeout(() => {
+      const enemy = battleCharacters.find((c) => c.id === battle.ai[0]);
+      if (!enemy) return;
+      const stat = aiStat(
+        opponentStats(battle, enemy.baseStats),
+        battle.difficulty,
+        Math.random,
+        availableStats(battle, "ai"),
+      );
+      if (stat) resolve(stat);
+    }, 900);
+    return () => window.clearTimeout(timer);
+  }, [battle, resolve]);
   const selectedDeck = s.decks.find((d) => d.id === deck)!;
   const selectedLimit =
     mode === "Quick Battle"
@@ -462,20 +480,9 @@ export function BattlePage({
             </button>
           ))}
           {battle.turn === "ai" && !battle.last && !battle.result && (
-            <button
-              className="primary"
-              onClick={() => {
-                const stat = aiStat(
-                  opponent,
-                  battle.difficulty,
-                  Math.random,
-                  availableStats(battle, "ai"),
-                );
-                if (stat) resolve(stat);
-              }}
-            >
-              Reveal AI selection
-            </button>
+            <p className="tip" role="status">
+              Opponent is choosing its attack…
+            </p>
           )}
           {battle.last && !battle.result && (
             <div className="round-result">
