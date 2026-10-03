@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import {
   compare,
   aiStat,
+  availableStats,
   createBattle,
   playRound,
   rewardMatch,
@@ -248,7 +249,12 @@ describe("match invariants", () => {
     const total = b.player.length + b.ai.length;
     for (let i = 0; i < 150 && !b.result; i++) {
       const c = characters.find((c) => c.id === b[b.turn][0])!;
-      b = playRound(b, aiStat(c.baseStats, "Expert"), s);
+      b = { ...b, last: undefined };
+      b = playRound(
+        b,
+        aiStat(c.baseStats, "Expert", Math.random, availableStats(b, b.turn))!,
+        s,
+      );
       expect(b.player.length + b.ai.length + b.pot.length).toBe(total);
     }
     expect(b.result).toBeDefined();

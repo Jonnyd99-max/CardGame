@@ -16,6 +16,7 @@ import {
   abilityName,
   combatStats,
   ritaCurse,
+  availableStats,
   type Battle as Match,
 } from "../game/battle";
 import { statsFor, validateDeck } from "../game/progression";
@@ -60,6 +61,7 @@ export function BattlePage({
   function resolve(stat: (typeof statKeys)[number]) {
     if (!battle || battle.last || battle.result) return;
     const next = playRound(battle, stat, s);
+    if (next === battle) return;
     audio.enabled = s.settings.sound;
     const attackSound =
       stat === "tech"
@@ -230,6 +232,8 @@ export function BattlePage({
           Opponent attributes stay hidden until the round resolves. AI uses only
           its own card and public base-stat averages. Classic resolves at{" "}
           {progression.classicRoundLimit} rounds if neither deck is exhausted.
+          Each side can choose each stat only once per fight. When both sides
+          run out, the final score decides the winner.
         </div>
       </>
     );
@@ -341,6 +345,11 @@ export function BattlePage({
           battleValues={ps}
         />
         <div className="stat-choices">
+          <p className="tip">
+            Each stat can be chosen once per side for the whole fight. Your
+            choices remaining: {availableStats(battle, "player").length} ·
+            Opponent: {availableStats(battle, "ai").length}.
+          </p>
           {!battle.last && !battle.result && (
             <div className="panel">
               <h3>{abilityName(pc.id)}</h3>
@@ -401,14 +410,21 @@ export function BattlePage({
           {statKeys.map((k) => (
             <button
               disabled={
-                !!battle.last || !!battle.result || battle.turn === "ai"
+                !!battle.last ||
+                !!battle.result ||
+                battle.turn === "ai" ||
+                !availableStats(battle, "player").includes(k)
               }
               key={k}
               className={`${battle.last?.stat === k ? "chosen" : ""} ${ritaCurse(battle) === k ? "cursed-stat" : ""}`}
               onClick={() => resolve(k)}
             >
               <strong>{ps[k]}</strong>
-              <span>{k === "special" ? "Special ability" : k}</span>
+              <span>
+                {k === "special" ? "Special ability" : k}
+                {battle.usedStats?.player.includes(k) ? " · Used by you" : ""}
+                {battle.usedStats?.ai.includes(k) ? " · Used by opponent" : ""}
+              </span>
               <b
                 aria-label={
                   battle.last ||
@@ -431,7 +447,15 @@ export function BattlePage({
           {battle.turn === "ai" && !battle.last && !battle.result && (
             <button
               className="primary"
-              onClick={() => resolve(aiStat(opponent, battle.difficulty))}
+              onClick={() => {
+                const stat = aiStat(
+                  opponent,
+                  battle.difficulty,
+                  Math.random,
+                  availableStats(battle, "ai"),
+                );
+                if (stat) resolve(stat);
+              }}
             >
               Reveal AI selection
             </button>

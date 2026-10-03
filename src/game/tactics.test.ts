@@ -6,6 +6,8 @@ import {
   opponentStats,
   playRound,
   ritaCurse,
+  availableStats,
+  aiStat,
 } from "./battle";
 import { campaignBattle, claimChapter, campaignStars } from "./adventures";
 import { characters } from "../data/characters";
@@ -102,4 +104,52 @@ it("casts Rita's curse outside her boss chapter and keeps it on the resolved rou
   expect(ritaCurse(fought)).toBe("strength");
   expect(ritaCurse({ ...fought, last: undefined })).toBeUndefined();
   expect(ritaCurse({ ...b, round: 1 })).toBe("speed");
+});
+it("locks stat choices per side across cards and rejects repeats", () => {
+  const s = newSave("Player", "rangers", "rangers-0");
+  const b = campaignBattle(s, "arrival", "starter")!;
+  const fought = playRound(b, "strength", s);
+  const later = { ...fought, last: undefined, turn: "player" as const };
+  expect(availableStats(later, "player")).not.toContain("strength");
+  expect(availableStats(later, "ai")).toContain("strength");
+  expect(playRound(later, "strength", s)).toBe(later);
+  const ai = playRound({ ...later, turn: "ai" }, "strength", s);
+  expect(ai.usedStats?.ai).toEqual(["strength"]);
+  expect(aiStat(characters[0].baseStats, "Expert", () => 0, ["tech"])).toBe(
+    "tech",
+  );
+  expect(aiStat(characters[0].baseStats, "Easy", () => 0, [])).toBeUndefined();
+});
+it("hands off exhausted choices and ends long fights when both sides run out", () => {
+  const s = newSave("Player", "rangers", "rangers-0");
+  const b = campaignBattle(s, "arrival", "starter")!;
+  const all = [
+    "strength",
+    "speed",
+    "intelligence",
+    "combat",
+    "durability",
+    "power",
+    "special",
+    "tech",
+  ] as const;
+  const exhausted = {
+    ...b,
+    mode: "Crossover Battle" as const,
+    target: 30,
+    usedStats: { player: all.filter((k) => k !== "tech"), ai: [] },
+  };
+  const handed = playRound(exhausted, "tech", s);
+  expect(handed.turn).toBe("ai");
+  expect(handed.result).toBeUndefined();
+  const final = playRound(
+    {
+      ...exhausted,
+      usedStats: { player: all.filter((k) => k !== "tech"), ai: [...all] },
+    },
+    "tech",
+    s,
+  );
+  expect(final.result).toBeDefined();
+  expect(final.log[0]).toContain("Both sides have used every stat");
 });

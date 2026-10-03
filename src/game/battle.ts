@@ -18,16 +18,18 @@ export function aiStat(
   own: Stats,
   difficulty: Difficulty,
   rng = Math.random,
-): Stat {
+  available: readonly Stat[] = statKeys,
+): Stat | undefined {
+  if (!available.length) return undefined;
   if (difficulty === "Easy" || (difficulty === "Normal" && rng() < 0.35))
-    return statKeys[Math.floor(rng() * statKeys.length)];
+    return available[Math.floor(rng() * available.length)];
   const averages = Object.fromEntries(
     statKeys.map((k) => [
       k,
       characters.reduce((n, c) => n + c.baseStats[k], 0) / characters.length,
     ]),
   ) as Stats;
-  return [...statKeys].sort(
+  return [...available].sort(
     (a, b) =>
       own[b] -
       (difficulty === "Expert" ? averages[b] : 0) -
@@ -35,6 +37,7 @@ export function aiStat(
   )[0];
 }
 export interface Battle {
+  usedStats?: { player: Stat[]; ai: Stat[] };
   usedAbilities?: string[];
   abilityRound?: {
     round: number;
@@ -162,8 +165,10 @@ export function createBattle(
   };
 }
 export function playRound(b: Battle, stat: Stat, s: Save): Battle {
-  if (b.result) return b;
+  if (b.result || b.last || !availableStats(b, b.turn).includes(stat)) return b;
   const next = structuredClone(b);
+  next.usedStats ||= { player: [], ai: [] };
+  next.usedStats[b.turn].push(stat);
   const p = battleCharacters.find((c) => c.id === b.player[0])!,
     a = battleCharacters.find((c) => c.id === b.ai[0])!;
   const ps = combatStats(
@@ -234,7 +239,20 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
             ? "player"
             : "ai";
   }
+  if (!next.result && !availableStats(next, next.turn).length) {
+    const other = next.turn === "player" ? "ai" : "player";
+    if (availableStats(next, other).length) next.turn = other;
+    else {
+      next.result = compare(next.scores[0], next.scores[1]);
+      next.log.unshift(
+        "Both sides have used every stat. The final score decides the fight.",
+      );
+    }
+  }
   return next;
+}
+export function availableStats(b: Battle, side: "player" | "ai"): Stat[] {
+  return statKeys.filter((stat) => !b.usedStats?.[side].includes(stat));
 }
 export function opponentStats(b: Battle, base: Stats): Stats {
   const phase = b.boss ? Math.min(2, Math.floor(b.round / 3)) : 0;
