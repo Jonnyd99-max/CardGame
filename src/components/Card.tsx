@@ -5,6 +5,7 @@ import { powerFor, statsFor, unlockLevelFor } from "../game/progression";
 import type { Character, Save } from "../types";
 import { items } from "../game/progression";
 import { ItemArtwork } from "./ItemArtwork";
+import { assetUrl } from "../game/assetUrl";
 export function Artwork({ character: c }: { character: Character }) {
   if (c.image && c.imageSheet) {
     const { columns, rows, index } = c.imageSheet;
@@ -14,7 +15,7 @@ export function Artwork({ character: c }: { character: Character }) {
         role="img"
         aria-label={`${c.name}, comic illustration`}
         style={{
-          backgroundImage: `url("${c.image}")`,
+          backgroundImage: `url("${assetUrl(c.image)}")`,
           backgroundSize: `${columns * 100}% ${rows * 100}%`,
           backgroundPosition: `${columns === 1 ? 0 : ((index % columns) / (columns - 1)) * 100}% ${rows === 1 ? 0 : (Math.floor(index / columns) / (rows - 1)) * 100}%`,
         }}
@@ -22,7 +23,7 @@ export function Artwork({ character: c }: { character: Character }) {
     );
   }
   return c.image ? (
-    <img className="character-image" src={c.image} alt={c.name} />
+    <img className="character-image" src={assetUrl(c.image)} alt={c.name} />
   ) : (
     <svg
       className="character-image"
