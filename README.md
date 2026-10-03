@@ -68,6 +68,10 @@ Add franchise entries in `src/data/franchises.ts`, groups in `src/data/groups.ts
 
 Put artwork you own or have permission to use in `public/artwork/`, then set a character's `image` to `/artwork/name.webp`. Empty paths use the original SVG illustration. Equipment supports image paths too. Avoid huge source images; use optimised WebP/AVIF/PNG. Mighty Morphin and Rick and Morty illustrations were generated with the built-in ImageGen tool; Marvel and DC use sourced comic artwork. See public/artwork/README.md for prompts, atlas mapping and source credits. Set imageSheet to undefined when replacing an atlas panel with a standalone image.
 
+### Personal weapons and equipment art
+
+All 12 items have comic artwork. The seven Mighty Morphin Rangers each have an exclusive personal weapon: Red's Power Sword, Blue's Power Lance, Pink's Power Bow, Black's Power Axe, Yellow's Power Daggers, Green's Dragon Dagger and White's Saba. Buy an eligible item in Equipment, then open its Ranger's detail page and choose Equip. Illustrated loadout panels appear on the card across home, collection, decks and battles. Equipping replaces only the matching weapon/equipment slot; removing an item removes its card panel and stat bonuses. Character restrictions are enforced by equipment rules and save validation. Existing inventory IDs and enhancements are preserved.
+
 ### Theme engine
 
 Theme data defines accent, glow and arena name. These are exposed as CSS variables at the app root; components inherit them. Favourite universe changes the interface/arena palette, favourite character changes hero/profile artwork and character-card colours. Rarities have separate border treatments. Card detail offers original and holographic styles. Settings allow animations, reduced motion and a sound toggle. Sound is a persisted placeholder for a future audio service; no sound assets are included. Device reduced-motion preferences are respected automatically.

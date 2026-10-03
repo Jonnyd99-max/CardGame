@@ -11,6 +11,104 @@
   font-synthesis: none;
   color-scheme: light;
 }
+.item-artwork {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.item-sheet {
+  background-repeat: no-repeat;
+}
+.equipment-art .item-artwork {
+  width: 160px;
+  height: 160px;
+}
+.equipment-art {
+  height: 190px;
+}
+.card-loadout {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  display: grid;
+  gap: 5px;
+  z-index: 2;
+  width: 76px;
+  pointer-events: none;
+}
+.card-item {
+  border: 1.5px solid var(--ink);
+  background: #fffaf0ed;
+  box-shadow: 2px 2px var(--ink);
+  padding: 2px;
+  border-radius: 2px;
+  transform: rotate(2deg);
+}
+.card-item.weapon {
+  background: #fff2c9ed;
+  transform: rotate(-2deg);
+}
+.card-item .item-artwork {
+  height: 65px;
+  width: 100%;
+}
+.card-item span:not(.item-artwork) {
+  display: block;
+  font-size: 8px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink);
+  padding: 3px 0;
+}
+.item-list-art {
+  height: 65px;
+  width: 65px;
+  flex-shrink: 0;
+  border: 1px solid var(--ink);
+  background: #fff2ce;
+}
+.item-list > div > section {
+  flex: 1;
+  min-width: 0;
+}
+.detail-preview .card-loadout {
+  width: 96px;
+}
+.detail-preview .card-item .item-artwork {
+  height: 90px;
+}
+.compact .card-loadout {
+  width: 58px;
+  gap: 4px;
+  right: 4px;
+  top: 4px;
+}
+.compact .card-item .item-artwork {
+  height: 45px;
+}
+.compact .card-item span:not(.item-artwork) {
+  font-size: 7px;
+}
+@media (max-width: 650px) {
+  .card-loadout {
+    width: 62px;
+  }
+  .card-item .item-artwork {
+    height: 50px;
+  }
+  .item-list-art {
+    width: 48px;
+    height: 48px;
+  }
+  .detail-preview .card-loadout {
+    width: 62px;
+  }
+  .detail-preview .card-item .item-artwork {
+    height: 58px;
+  }
+}
 body {
   background: radial-gradient(#2823210b 0.8px, transparent 0.8px), #f6f0e3;
   background-size: 7px 7px;

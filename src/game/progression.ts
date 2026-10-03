@@ -106,6 +106,29 @@ export function compatible(c: Character, item: Item) {
     (!item.characters.length || item.characters.includes(c.id))
   );
 }
+export function toggleEquipment(s: Save, characterId: string, itemId: string) {
+  const c = characters.find((c) => c.id === characterId);
+  const item = items.find((item) => item.id === itemId);
+  const p = s.cards[characterId];
+  if (
+    !c ||
+    !item ||
+    !p ||
+    !s.owned.includes(characterId) ||
+    !s.items[itemId] ||
+    !compatible(c, item)
+  )
+    return false;
+  const removing = p.equipment.includes(itemId);
+  p.equipment = p.equipment.filter(
+    (id) => items.find((other) => other.id === id)?.slot !== item.slot,
+  );
+  if (!removing) {
+    p.equipment.push(itemId);
+    s.equips++;
+  }
+  return true;
+}
 export function unlock(s: Save) {
   const level = playerLevel(s.xp);
   characters

@@ -6,6 +6,7 @@ import { groups } from "../data/groups";
 import { abilities } from "../data/abilities";
 import { Card } from "../components/Card";
 import { Progress } from "../components/UI";
+import { ItemArtwork } from "../components/ItemArtwork";
 import {
   statsFor,
   cardProgress,
@@ -13,6 +14,7 @@ import {
   compatible,
   playerLevel,
   unlockLevelFor,
+  toggleEquipment,
 } from "../game/progression";
 import { statKeys, type Save } from "../types";
 export function CharacterDetail({
@@ -180,6 +182,9 @@ export function CharacterDetail({
                     const equipped = p.equipment.includes(i.id);
                     return (
                       <div key={i.id}>
+                        <div className="item-list-art">
+                          <ItemArtwork item={i} />
+                        </div>
                         <section>
                           <b>{i.name}</b>
                           <small>
@@ -195,16 +200,7 @@ export function CharacterDetail({
                           disabled={!s.items[i.id]}
                           onClick={() =>
                             update((x) => {
-                              const progress = x.cards[id];
-                              progress.equipment = progress.equipment.filter(
-                                (item) =>
-                                  items.find((e) => e.id === item)?.slot !==
-                                  i.slot,
-                              );
-                              if (!equipped) {
-                                progress.equipment.push(i.id);
-                                x.equips++;
-                              }
+                              toggleEquipment(x, id, i.id);
                             })
                           }
                         >

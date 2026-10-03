@@ -1,10 +1,14 @@
 import type { Item } from "../types";
+const art = (index: number) => ({
+  image: "/artwork/equipment-comic-atlas.png",
+  imageSheet: { columns: 4, rows: 3, index },
+});
 export const equipment: Item[] = [
   {
     id: "shield",
     name: "Aegis armour",
     rarity: "Rare",
-    image: "",
+    ...art(9),
     description: "A reactive shield woven from dimensional energy.",
     modifiers: { durability: 4, strength: 2 },
     unlockLevel: 1,
@@ -18,7 +22,7 @@ export const equipment: Item[] = [
     id: "scanner",
     name: "Quantum scanner",
     rarity: "Uncommon",
-    image: "",
+    ...art(10),
     description: "Read the battlefield before it changes.",
     modifiers: { intelligence: 3, tech: 4 },
     unlockLevel: 1,
@@ -30,9 +34,9 @@ export const equipment: Item[] = [
   },
   {
     id: "morpher",
-    name: "Prism morpher",
+    name: "Power Morpher",
     rarity: "Epic",
-    image: "",
+    ...art(11),
     description: "Channel the power of the morphing grid.",
     modifiers: { power: 5, combat: 2 },
     unlockLevel: 5,

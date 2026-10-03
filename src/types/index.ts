@@ -44,6 +44,7 @@ export interface Item {
   name: string;
   rarity: Rarity;
   image: string;
+  imageSheet?: { columns: number; rows: number; index: number };
   description: string;
   modifiers: Partial<Stats>;
   unlockLevel: number;

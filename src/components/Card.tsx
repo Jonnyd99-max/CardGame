@@ -3,6 +3,8 @@ import { rarities } from "../data/rarities";
 import { franchises } from "../data/franchises";
 import { powerFor, statsFor, unlockLevelFor } from "../game/progression";
 import type { Character, Save } from "../types";
+import { items } from "../game/progression";
+import { ItemArtwork } from "./ItemArtwork";
 export function Artwork({ character: c }: { character: Character }) {
   if (c.image && c.imageSheet) {
     const { columns, rows, index } = c.imageSheet;
@@ -105,6 +107,15 @@ export function Card({
 }) {
   const p = s.cards[c.id];
   const stats = statsFor(c, s);
+  const loadout = locked
+    ? []
+    : (p?.equipment || [])
+        .map((id) => items.find((item) => item.id === id)!)
+        .filter(Boolean)
+        .sort(
+          (a, b) =>
+            Number(a.slot === "equipment") - Number(b.slot === "equipment"),
+        );
   return (
     <button
       className={`battle-card ${compact ? "compact" : ""} ${locked ? "locked" : ""} ${p?.style === "holographic" ? "holo" : ""}`}
@@ -134,6 +145,20 @@ export function Card({
       </div>
       <div className="card-art">
         <Artwork character={c} />
+        {!!loadout.length && (
+          <div className="card-loadout" aria-label="Equipped loadout">
+            {loadout.map((item) => (
+              <div
+                className={`card-item ${item.slot}`}
+                key={item.id}
+                title={`${item.name} · Tier ${s.items[item.id] || 1}`}
+              >
+                <ItemArtwork item={item} />
+                <span>{item.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
         {locked && (
           <div className="lock-label">
             <Lock size={25} />

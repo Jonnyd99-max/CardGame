@@ -1,6 +1,7 @@
 import type { Character, Rarity, Stats } from "../types";
 import { statKeys } from "../types";
 import { characterStats } from "./characterStats";
+import { rangerWeapons } from "./weapons";
 const entries: [string, string, string, string][] = [
   ["rangers", "morphin", "Red Ranger", "Courage at the heart of every battle."],
   ["rangers", "morphin", "Blue Ranger", "A brilliant mind behind the visor."],
@@ -115,7 +116,13 @@ export const characters: Character[] = entries.map(
       baseStats,
       maxStats: Object.fromEntries(statKeys.map((k) => [k, 100])) as Stats,
       abilities: ["signature", "focus"],
-      compatibleWeapons: ["pulse-blade", "blaster"],
+      compatibleWeapons: [
+        "pulse-blade",
+        "blaster",
+        ...(rangerWeapons[`${franchise}-${n}`]
+          ? [rangerWeapons[`${franchise}-${n}`]]
+          : []),
+      ],
       compatibleEquipment:
         franchise === "rangers"
           ? ["shield", "scanner", "morpher"]

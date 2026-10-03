@@ -1,10 +1,11 @@
-import { Gift, Shield, Zap, Check, Trophy } from "lucide-react";
+import { Gift, Zap, Check, Trophy } from "lucide-react";
 import { characters } from "../data/characters";
 import { progression } from "../data/unlocks";
 import { items, playerLevel, periodKeys, grantXP } from "../game/progression";
 import { challenges } from "../data/challenges";
 import { Progress } from "../components/UI";
 import { Card } from "../components/Card";
+import { ItemArtwork } from "../components/ItemArtwork";
 import type { Save } from "../types";
 export function Upgrades({
   save,
@@ -70,11 +71,7 @@ export function Equipment({
           return (
             <div className="panel equipment-card" key={i.id}>
               <div className="equipment-art">
-                {i.image ? (
-                  <img src={i.image} alt={i.name} />
-                ) : (
-                  <Shield size={65} />
-                )}
+                <ItemArtwork item={i} />
               </div>
               <span className="eyebrow">
                 {i.rarity} · {i.slot}
@@ -90,9 +87,11 @@ export function Equipment({
               </div>
               <small>
                 Unlock level {i.unlockLevel} ·{" "}
-                {i.franchises.length
-                  ? i.franchises.join(", ")
-                  : "Universal compatibility"}
+                {i.characters.length
+                  ? `For ${i.characters.map((id) => characters.find((c) => c.id === id)?.name).join(", ")}`
+                  : i.franchises.length
+                    ? "Mighty Morphin Rangers"
+                    : "Universal compatibility"}
               </small>
               <button
                 className="primary full"
