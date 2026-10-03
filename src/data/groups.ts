@@ -1,7 +1,5 @@
 export const groups = [
-  { id: "morphin", name: "Mighty Morphin", franchise: "rangers" },
-  { id: "zeo", name: "Zeo", franchise: "rangers" },
-  { id: "space", name: "Space", franchise: "rangers" },
+  { id: "morphin", name: "Mighty Morphin Power Rangers", franchise: "rangers" },
   { id: "avengers", name: "Avengers", franchise: "marvel" },
   { id: "spider", name: "Spider heroes", franchise: "marvel" },
   { id: "xmen", name: "X-Men", franchise: "marvel" },

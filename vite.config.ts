@@ -11,8 +11,8 @@ export default defineConfig({
         name: "JD Multiverse Battle Cards",
         short_name: "JD Cards",
         description: "Collect. Upgrade. Battle across universes.",
-        theme_color: "#101018",
-        background_color: "#101018",
+        theme_color: "#f6f0e3",
+        background_color: "#f6f0e3",
         display: "standalone",
         icons: [
           {
@@ -29,7 +29,10 @@ export default defineConfig({
           },
         ],
       },
-      workbox: { globPatterns: ["**/*.{js,css,html,svg,png}"] },
+      workbox: {
+        globPatterns: ["**/*.{js,css,html,svg,png,jpg}"],
+        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
+      },
     }),
   ],
 });

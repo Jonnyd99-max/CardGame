@@ -26,6 +26,11 @@ export function Home({
   const fav = characters.find((c) => c.id === s.favourite) || characters[0];
   const featured = s.owned
     .map((id) => characters.find((c) => c.id === id)!)
+    .sort(
+      (a, b) =>
+        Number(b.franchise === s.franchise) -
+        Number(a.franchise === s.franchise),
+    )
     .slice(0, 4);
   return (
     <>

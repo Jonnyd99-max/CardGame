@@ -49,7 +49,13 @@ export function DevEditor({ save }: { save: Save }) {
                 {k}
                 <input
                   value={c[k]}
-                  onChange={(e) => setC({ ...c, [k]: e.target.value })}
+                  onChange={(e) =>
+                    setC({
+                      ...c,
+                      [k]: e.target.value,
+                      ...(k === "image" ? { imageSheet: undefined } : {}),
+                    })
+                  }
                 />
               </label>
             ),

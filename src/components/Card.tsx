@@ -4,6 +4,21 @@ import { franchises } from "../data/franchises";
 import { powerFor, statsFor } from "../game/progression";
 import type { Character, Save } from "../types";
 export function Artwork({ character: c }: { character: Character }) {
+  if (c.image && c.imageSheet) {
+    const { columns, rows, index } = c.imageSheet;
+    return (
+      <div
+        className="character-image artwork-sheet"
+        role="img"
+        aria-label={`${c.name}, comic illustration`}
+        style={{
+          backgroundImage: `url("${c.image}")`,
+          backgroundSize: `${columns * 100}% ${rows * 100}%`,
+          backgroundPosition: `${columns === 1 ? 0 : ((index % columns) / (columns - 1)) * 100}% ${rows === 1 ? 0 : (Math.floor(index / columns) / (rows - 1)) * 100}%`,
+        }}
+      />
+    );
+  }
   return c.image ? (
     <img className="character-image" src={c.image} alt={c.name} />
   ) : (
@@ -79,12 +94,14 @@ export function Card({
   onClick,
   compact = false,
   locked = false,
+  hideStats = false,
 }: {
   character: Character;
   save: Save;
   onClick?: () => void;
   compact?: boolean;
   locked?: boolean;
+  hideStats?: boolean;
 }) {
   const p = s.cards[c.id];
   const stats = statsFor(c, s);
@@ -123,27 +140,33 @@ export function Card({
             <span>Unlock at level {c.unlockLevel}</span>
           </div>
         )}
-        <div className="power-badge">
-          <strong>{powerFor(c, s)}</strong>
-          <small>POWER</small>
-        </div>
+        {!hideStats && (
+          <div className="power-badge">
+            <strong>{powerFor(c, s)}</strong>
+            <small>POWER</small>
+          </div>
+        )}
       </div>
       <div className="card-bottom">
         <small style={{ color: rarities[c.rarity] }}>
           ◆ {c.rarity.toUpperCase()}
         </small>
         <h3>{c.name}</h3>
-        <div className="card-mini-stats">
-          <span>
-            STR <b>{stats.strength}</b>
-          </span>
-          <span>
-            SPD <b>{stats.speed}</b>
-          </span>
-          <span>
-            INT <b>{stats.intelligence}</b>
-          </span>
-        </div>
+        {hideStats ? (
+          <div className="hidden-stats">STATS SEALED · REVEAL AFTER BATTLE</div>
+        ) : (
+          <div className="card-mini-stats">
+            <span>
+              STR <b>{stats.strength}</b>
+            </span>
+            <span>
+              SPD <b>{stats.speed}</b>
+            </span>
+            <span>
+              INT <b>{stats.intelligence}</b>
+            </span>
+          </div>
+        )}
       </div>
     </button>
   );

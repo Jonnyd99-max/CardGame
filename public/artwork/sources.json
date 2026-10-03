@@ -1,0 +1,114 @@
+[
+  {
+    "id": "marvel-0",
+    "name": "Spider-Man",
+    "image": "/artwork/marvel-0.png",
+    "source": "https://upload.wikimedia.org/wikipedia/en/2/21/Web_of_Spider-Man_Vol_1_129-1.png",
+    "page": "https://en.wikipedia.org/wiki/Spider-Man"
+  },
+  {
+    "id": "marvel-1",
+    "name": "Iron Man",
+    "image": "/artwork/marvel-1.png",
+    "source": "https://upload.wikimedia.org/wikipedia/en/4/47/Iron_Man_%28circa_2018%29.png",
+    "page": "https://en.wikipedia.org/wiki/Iron_Man"
+  },
+  {
+    "id": "marvel-2",
+    "name": "Captain America",
+    "image": "/artwork/marvel-2.png",
+    "source": "https://upload.wikimedia.org/wikipedia/en/f/f4/Captain_America.png",
+    "page": "https://en.wikipedia.org/wiki/Captain_America"
+  },
+  {
+    "id": "marvel-3",
+    "name": "Black Widow (Natasha Romanova)",
+    "image": "/artwork/marvel-3.jpg",
+    "source": "https://upload.wikimedia.org/wikipedia/en/3/37/Natasha_Romanova_incarnations.jpg",
+    "page": "https://en.wikipedia.org/wiki/Black_Widow_%28Natasha_Romanova%29"
+  },
+  {
+    "id": "marvel-4",
+    "name": "Wolverine (character)",
+    "image": "/artwork/marvel-4.jpg",
+    "source": "https://upload.wikimedia.org/wikipedia/en/d/d3/Wolverine_%28circa_2024%29.jpg",
+    "page": "https://en.wikipedia.org/wiki/Wolverine_%28character%29"
+  },
+  {
+    "id": "marvel-5",
+    "name": "Star-Lord",
+    "image": "/artwork/marvel-5.png",
+    "source": "https://upload.wikimedia.org/wikipedia/en/1/15/ST1.PNG",
+    "page": "https://en.wikipedia.org/wiki/Star-Lord"
+  },
+  {
+    "id": "marvel-6",
+    "name": "Thor (Marvel Comics)",
+    "image": "/artwork/marvel-6.png",
+    "source": "https://upload.wikimedia.org/wikipedia/en/1/1a/Thor_%28Marvel_Comics%29.png",
+    "page": "https://en.wikipedia.org/wiki/Thor_%28Marvel_Comics%29"
+  },
+  {
+    "id": "marvel-7",
+    "name": "Thanos",
+    "image": "/artwork/marvel-7.png",
+    "source": "https://upload.wikimedia.org/wikipedia/en/b/b7/Thanos_%28Infobox_image%29.png",
+    "page": "https://en.wikipedia.org/wiki/Thanos"
+  },
+  {
+    "id": "dc-0",
+    "name": "Batman",
+    "image": "/artwork/dc-0.jpg",
+    "source": "https://upload.wikimedia.org/wikipedia/en/c/c7/Batman_Infobox.jpg",
+    "page": "https://en.wikipedia.org/wiki/Batman"
+  },
+  {
+    "id": "dc-1",
+    "name": "Barry Allen",
+    "image": "/artwork/dc-1.png",
+    "source": "https://upload.wikimedia.org/wikipedia/en/b/b7/Flash_%28Barry_Allen%29.png",
+    "page": "https://en.wikipedia.org/wiki/Barry_Allen"
+  },
+  {
+    "id": "dc-2",
+    "name": "Wonder Woman",
+    "image": "/artwork/dc-2.jpg",
+    "source": "https://upload.wikimedia.org/wikipedia/en/6/6b/Wonder_Woman_750.jpg",
+    "page": "https://en.wikipedia.org/wiki/Wonder_Woman"
+  },
+  {
+    "id": "dc-3",
+    "name": "Nightwing",
+    "image": "/artwork/dc-3.png",
+    "source": "https://upload.wikimedia.org/wikipedia/en/8/8b/Nightwing_Vol_4_137_%282026_Cover_B_David_Nakayama_art.png",
+    "page": "https://en.wikipedia.org/wiki/Nightwing"
+  },
+  {
+    "id": "dc-4",
+    "name": "Raven (DC Comics)",
+    "image": "/artwork/dc-4.png",
+    "source": "https://upload.wikimedia.org/wikipedia/en/6/6c/Raven_%28DC_Comics%29_Modern_001.png",
+    "page": "https://en.wikipedia.org/wiki/Raven_%28DC_Comics%29"
+  },
+  {
+    "id": "dc-5",
+    "name": "Aquaman",
+    "image": "/artwork/dc-5.png",
+    "source": "https://upload.wikimedia.org/wikipedia/en/9/9d/Aquaman_Rebirth_1.png",
+    "page": "https://en.wikipedia.org/wiki/Aquaman"
+  },
+  {
+    "id": "dc-6",
+    "name": "Superman",
+    "image": "/artwork/dc-6.png",
+    "source": "https://upload.wikimedia.org/wikipedia/en/3/35/Supermanflying.png",
+    "page": "https://en.wikipedia.org/wiki/Superman"
+  },
+  {
+    "id": "dc-7",
+    "name": "Darkseid",
+    "image": "/artwork/dc-7.png",
+    "source": "https://upload.wikimedia.org/wikipedia/en/7/7b/Darkseid_%28circa_2026%29.png",
+    "page": "https://en.wikipedia.org/wiki/Darkseid"
+  }
+]

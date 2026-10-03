@@ -25,6 +25,7 @@ export interface Character {
   description: string;
   rarity: Rarity;
   image: string;
+  imageSheet?: { columns: number; rows: number; index: number };
   unlockLevel: number;
   baseLevel: number;
   maxLevel: number;
@@ -69,6 +70,7 @@ export interface Deck {
   rule: DeckRule;
 }
 export interface Save {
+  presentationVersion?: number;
   version: 1;
   name: string;
   xp: number;

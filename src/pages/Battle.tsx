@@ -141,8 +141,8 @@ export function BattlePage({
           <p>{validateDeck(s.decks.find((d) => d.id === deck)!, s)}</p>
         </div>
         <div className="tip">
-          Both cards are visible when choosing a stat. AI uses only its own card
-          and public base-stat averages. Classic resolves at{" "}
+          Opponent attributes stay hidden until the round resolves. AI uses only
+          its own card and public base-stat averages. Classic resolves at{" "}
           {progression.classicRoundLimit} rounds if neither deck is exhausted.
         </div>
       </>
@@ -169,8 +169,9 @@ export function BattlePage({
       </div>
       {tutorial && (
         <div className="tutorial-banner">
-          Welcome to your first battle! Choose a stat where your card has an
-          advantage. Highest value wins. The round winner chooses next.
+          It’s morphin time! Pick one of your strongest stats. Your opponent’s
+          stats are secret until the fight. Highest value wins; the winner
+          chooses next.
         </div>
       )}
       <div className="scoreboard">
@@ -212,7 +213,9 @@ export function BattlePage({
             >
               <strong>{ps[k]}</strong>
               <span>{k === "special" ? "Special ability" : k}</span>
-              <b>{ac.baseStats[k]}</b>
+              <b aria-label={battle.last ? undefined : "Opponent stat hidden"}>
+                {battle.last ? ac.baseStats[k] : "?"}
+              </b>
             </button>
           ))}
           {battle.turn === "ai" && !battle.last && !battle.result && (
@@ -248,6 +251,7 @@ export function BattlePage({
           key={`a-${ac.id}-${battle.round}`}
           character={ac}
           save={{ ...s, cards: {}, favourite: "" }}
+          hideStats={!battle.last}
         />
       </div>
       {battle.result && (

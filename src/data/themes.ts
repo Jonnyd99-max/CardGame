@@ -2,8 +2,12 @@ export const themes: Record<
   string,
   { accent: string; glow: string; arena: string }
 > = {
-  rangers: { accent: "#f57778", glow: "#582333", arena: "Command centre" },
-  marvel: { accent: "#c8fc60", glow: "#374625", arena: "Neon city" },
-  dc: { accent: "#9baaff", glow: "#24294e", arena: "Gotham skyline" },
-  rick: { accent: "#5eeac1", glow: "#1f4943", arena: "Portal dimension" },
+  rangers: {
+    accent: "#dc303c",
+    glow: "#ffd762",
+    arena: "Mighty Morphin Command Centre",
+  },
+  marvel: { accent: "#dc323b", glow: "#ffe7ab", arena: "Comic city" },
+  dc: { accent: "#345aaa", glow: "#bcd8f0", arena: "Heroic skyline" },
+  rick: { accent: "#168653", glow: "#dbf49c", arena: "Portal dimension" },
 };

@@ -1,30 +1,30 @@
 export const franchises = [
   {
     id: "rangers",
-    name: "Power Rangers",
-    subtitle: "Command centre",
-    color: "#f25e66",
+    name: "Mighty Morphin",
+    subtitle: "Power Rangers",
+    color: "#dc303c",
     symbol: "⚡",
   },
   {
     id: "marvel",
     name: "Marvel",
     subtitle: "Heroes assemble",
-    color: "#c8fc60",
+    color: "#c93139",
     symbol: "✦",
   },
   {
     id: "dc",
     name: "Justice League / DC",
-    subtitle: "Dark heroic city",
-    color: "#8d9fff",
+    subtitle: "Heroic skyline",
+    color: "#345aaa",
     symbol: "◆",
   },
   {
     id: "rick",
     name: "Rick and Morty",
     subtitle: "Beyond the portal",
-    color: "#5eeac1",
+    color: "#168653",
     symbol: "◎",
   },
 ];

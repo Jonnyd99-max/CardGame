@@ -10,8 +10,18 @@ const entries: [string, string, string, string][] = [
   ],
   ["rangers", "morphin", "Black Ranger", "Rhythm meets raw combat skill."],
   ["rangers", "morphin", "Yellow Ranger", "A fierce and balanced defender."],
-  ["rangers", "zeo", "Gold Ranger", "Ancient power, a golden legacy."],
-  ["rangers", "space", "Silver Ranger", "A guardian from beyond the stars."],
+  [
+    "rangers",
+    "morphin",
+    "White Ranger",
+    "Tommy Oliver channels the power of the White Tiger.",
+  ],
+  [
+    "rangers",
+    "morphin",
+    "Green Ranger",
+    "Tommy Oliver. Dragon Shield. Dragonzord power.",
+  ],
   ["rangers", "morphin", "Lord Zedd", "An emperor of cosmic chaos."],
   ["marvel", "spider", "Spider-Man", "Your friendly neighbourhood wildcard."],
   [
@@ -107,7 +117,14 @@ export const characters: Character[] = entries.map(
       group,
       description,
       rarity: rarity[n],
-      image: "",
+      image:
+        franchise === "rangers" || franchise === "rick"
+          ? `/artwork/${franchise}-comic-atlas.png`
+          : `/artwork/${franchise}-${n}.${(franchise === "marvel" && [3, 4].includes(n)) || (franchise === "dc" && [0, 2].includes(n)) ? "jpg" : "png"}`,
+      imageSheet:
+        franchise === "rangers" || franchise === "rick"
+          ? { columns: 4, rows: 2, index: n }
+          : undefined,
       unlockLevel: [1, 1, 1, 1, 5, 10, 20, 30][n],
       baseLevel: 1,
       maxLevel: 30,
@@ -124,7 +141,19 @@ export const characters: Character[] = entries.map(
         n === 7 ? "villain" : "hero",
         n === 1 ? "intelligence" : "balanced",
       ],
-      color: colors[n],
+      color:
+        franchise === "rangers"
+          ? [
+              "#e22e38",
+              "#167ad4",
+              "#dc3c94",
+              "#292e38",
+              "#eac523",
+              "#d3ad3c",
+              "#15974d",
+              "#ba3046",
+            ][n]
+          : colors[n],
       avatar: n,
     };
   },

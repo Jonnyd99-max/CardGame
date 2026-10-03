@@ -10,8 +10,8 @@ export function Onboarding({
 }) {
   const [step, setStep] = useState(0),
     [name, setName] = useState(""),
-    [franchise, setFranchise] = useState("marvel"),
-    [character, setCharacter] = useState("marvel-0");
+    [franchise, setFranchise] = useState("rangers"),
+    [character, setCharacter] = useState("rangers-0");
   return (
     <main className="onboarding">
       <div className="brand">

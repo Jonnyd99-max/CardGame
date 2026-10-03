@@ -21,6 +21,7 @@ export function newSave(
     .map((c) => c.id);
   return {
     version: 1,
+    presentationVersion: 2,
     name,
     xp: 0,
     coins: 350,
@@ -63,6 +64,15 @@ const stringArray = (v: unknown): v is string[] =>
   Array.isArray(v) && v.every((id) => typeof id === "string");
 export function parseSave(raw: string): Save {
   const s = JSON.parse(raw) as Save;
+  // Preserve IDs, ownership and upgrades while moving old Ranger preferences to MMPR.
+  if (s?.franchise === "rangers" && ["zeo", "space"].includes(s.group))
+    s.group = "morphin";
+  if (s?.version === 1 && !s.presentationVersion && Array.isArray(s.owned)) {
+    s.franchise = "rangers";
+    s.group = "morphin";
+    s.favourite = s.owned.includes("rangers-0") ? "rangers-0" : s.favourite;
+    s.presentationVersion = 2;
+  }
   const fail = () => {
     throw new Error(
       "This is not a valid version 1 save. Your current progress has been kept.",

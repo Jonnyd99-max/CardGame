@@ -57,8 +57,7 @@ export function CharacterDetail({
       <div className="detail-preview">
         <Card character={c} save={s} locked={!owned} />
         <div className="tip">
-          Original placeholder artwork · replace the image path in character
-          data.
+          Comic edition · Collect your favourite heroes.
         </div>
       </div>
       <div>

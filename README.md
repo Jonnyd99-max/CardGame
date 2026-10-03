@@ -1,6 +1,6 @@
 # JD Multiverse Battle Cards
 
-A playable, local-first collectible Top Trumps game built with React, TypeScript and Vite. Collect 32 sample characters across Power Rangers, Marvel, Justice League/DC and Rick and Morty; build decks, choose stats, earn rewards and grow your collection. All artwork is original generic SVG placeholder art. No third-party character artwork or logos are bundled.
+A playable, local-first collectible Top Trumps game built with React, TypeScript and Vite. Collect 32 sample characters across Power Rangers, Marvel, Justice League/DC and Rick and Morty; build decks, choose stats, earn rewards and grow your collection. The comic edition uses raster character illustrations, cream paper, halftone textures and bold ink borders. The Rangers lineup is entirely Mighty Morphin, including White Ranger and Green Ranger.
 
 ## Run locally
 
@@ -23,7 +23,7 @@ Use HTTPS when hosting, or localhost, to enable service workers. Deploy the `dis
 
 ## How to play
 
-On first launch, enter your name, choose a universe and starter favourite, then play a short tutorial. You receive four starter cards, 350 coins and five materials. Highest selected stat wins the round; ties award no point. Both cards are visible. The winner chooses the next stat; tied rounds retain the current chooser. The AI uses its own card and public base-stat averages, never the player's current card or private upgrades.
+On first launch, enter your name, choose a universe and starter favourite, then play a short tutorial. You receive four starter cards, 350 coins and five materials. Highest selected stat wins the round; ties award no point. Both characters are visible, but opponent stats and power stay sealed until the round resolves. They are hidden again at the start of the next round. The winner chooses the next stat; tied rounds retain the current chooser. The AI uses its own card and public base-stat averages, never the player's current card or private upgrades.
 
 - **Quick Battle:** best of three rounds.
 - **Classic:** round winners capture both cards and any tied pot. Own the full deck to win. A 150-round safeguard uses remaining card counts; equal counts draw.
@@ -60,7 +60,7 @@ Add franchise entries in `src/data/franchises.ts`, groups in `src/data/groups.ts
 
 ### Artwork
 
-Put artwork you own or have permission to use in `public/artwork/`, then set a character's `image` to `/artwork/name.webp`. Empty paths use the original SVG illustration. Equipment supports image paths too. Avoid huge source images; use optimised WebP/AVIF/PNG. Placeholder art is deliberately generic rather than a recreation of franchise costume designs.
+Put artwork you own or have permission to use in `public/artwork/`, then set a character's `image` to `/artwork/name.webp`. Empty paths use the original SVG illustration. Equipment supports image paths too. Avoid huge source images; use optimised WebP/AVIF/PNG. Mighty Morphin and Rick and Morty illustrations were generated with the built-in ImageGen tool; Marvel and DC use sourced comic artwork. See public/artwork/README.md for prompts, atlas mapping and source credits. Set imageSheet to undefined when replacing an atlas panel with a standalone image.
 
 ### Theme engine
 
