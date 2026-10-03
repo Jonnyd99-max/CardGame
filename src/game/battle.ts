@@ -187,6 +187,11 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
   next.log.unshift(
     `${p.name} ${ps[stat]} · ${a.name} ${as[stat]} — ${stat}: ${winner === "draw" ? "tie" : winner === "player" ? "you win" : "opponent wins"}`,
   );
+  const curse = ritaCurse(b);
+  if (curse)
+    next.log.unshift(
+      `Rita casts Moon Curse: your ${curse} is reduced by 8 for this round.`,
+    );
   if (winner !== "draw") {
     next.scores[winner === "player" ? 0 : 1]++;
     next.turn = winner;
@@ -284,8 +289,8 @@ export function activateAbility(
 export function combatStats(b: Battle, id: string, base: Stats): Stats {
   const values = { ...base };
   const round = b.last ? b.round - 1 : b.round;
-  if (b.chapter === "titan") {
-    const cursed = statKeys[round % statKeys.length];
+  const cursed = ritaCurse(b);
+  if (cursed) {
     values[cursed] = Math.max(1, values[cursed] - 8);
   }
   const a = b.abilityRound;
@@ -296,6 +301,11 @@ export function combatStats(b: Battle, id: string, base: Stats): Stats {
     } else values[a.stat] = a.value ?? Math.min(100, values[a.stat] + 8);
   }
   return values;
+}
+export function ritaCurse(b: Battle): Stat | undefined {
+  if (b.chapter !== "titan" && (b.last?.aiId || b.ai[0]) !== "enemy-rita")
+    return undefined;
+  return statKeys[(b.last ? b.round - 1 : b.round) % statKeys.length];
 }
 export function rewardMatch(s: Save, b: Battle) {
   if (!b.result) return s;

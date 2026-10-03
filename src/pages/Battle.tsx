@@ -15,6 +15,7 @@ import {
   activateAbility,
   abilityName,
   combatStats,
+  ritaCurse,
   type Battle as Match,
 } from "../game/battle";
 import { statsFor, validateDeck } from "../game/progression";
@@ -323,6 +324,15 @@ export function BattlePage({
           </span>
         </div>
       </div>
+      {ritaCurse(battle) && (
+        <div className="curse-banner" role="status">
+          <strong>RITA CASTS MOON CURSE!</strong>
+          <p>
+            Your {ritaCurse(battle)} is reduced by 8 this round. The highlighted
+            battle value already includes the curse.
+          </p>
+        </div>
+      )}
       <div className="battle-layout">
         <Card
           key={`p-${pc.id}-${battle.round}`}
@@ -374,13 +384,7 @@ export function BattlePage({
               </button>
             </div>
           )}
-          {battle.chapter === "titan" && (
-            <p className="tip">
-              Rita’s spell: −8{" "}
-              {statKeys[(battle.last ? battle.round - 1 : battle.round) % 8]}{" "}
-              this round.
-            </p>
-          )}
+
           {battle.chapter === "ultron" && (
             <p className="tip">
               Ultron adapts: +10 defence against your previous stat choice.
@@ -400,7 +404,7 @@ export function BattlePage({
                 !!battle.last || !!battle.result || battle.turn === "ai"
               }
               key={k}
-              className={battle.last?.stat === k ? "chosen" : ""}
+              className={`${battle.last?.stat === k ? "chosen" : ""} ${ritaCurse(battle) === k ? "cursed-stat" : ""}`}
               onClick={() => resolve(k)}
             >
               <strong>{ps[k]}</strong>

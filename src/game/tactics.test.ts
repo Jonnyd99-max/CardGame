@@ -5,6 +5,7 @@ import {
   combatStats,
   opponentStats,
   playRound,
+  ritaCurse,
 } from "./battle";
 import { campaignBattle, claimChapter, campaignStars } from "./adventures";
 import { characters } from "../data/characters";
@@ -83,4 +84,22 @@ it("awards only improvements in campaign stars and validates their saves", () =>
   expect(() =>
     parseSave(JSON.stringify({ ...s, campaignStars: { arrival: 4 } })),
   ).toThrow();
+});
+it("casts Rita's curse outside her boss chapter and keeps it on the resolved round", () => {
+  const s = newSave("Player", "rangers", "rangers-0");
+  const b = {
+    ...campaignBattle(s, "arrival", "starter")!,
+    chapter: "shadow",
+    ai: ["enemy-rita", "enemy-goldar"],
+  };
+  const base = characters[0].baseStats;
+  expect(ritaCurse(b)).toBe("strength");
+  expect(combatStats(b, "rangers-0", base).strength).toBe(base.strength - 8);
+  const fought = playRound(b, "strength", s);
+  expect(fought.last?.a).toBe(base.strength - 8);
+  expect(fought.log[0]).toContain("Rita casts Moon Curse");
+  expect(fought.ai[0]).toBe("enemy-goldar");
+  expect(ritaCurse(fought)).toBe("strength");
+  expect(ritaCurse({ ...fought, last: undefined })).toBeUndefined();
+  expect(ritaCurse({ ...b, round: 1 })).toBe("speed");
 });

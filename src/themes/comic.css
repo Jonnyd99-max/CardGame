@@ -1191,3 +1191,22 @@ footer {
   }
 }
 
+.curse-banner {
+  margin: 18px 0;
+  border: 3px solid #53296e;
+  background: #edddfa;
+  color: #53296e;
+  padding: 18px;
+  box-shadow: 4px 4px #53296e;
+}
+.curse-banner strong {
+  font-family: Bangers, cursive;
+  font-size: 28px;
+}
+.curse-banner p {
+  color: #53296e;
+}
+.stat-choices button.cursed-stat {
+  border: 3px solid #78399c;
+  background: #edddfa;
+}
