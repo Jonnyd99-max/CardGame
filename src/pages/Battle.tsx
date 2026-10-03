@@ -342,7 +342,7 @@ export function BattlePage({
                     : pc.id === "rangers-6"
                       ? "+12 durability and +6 combat this round."
                       : "+8 to one stat this round."}{" "}
-                One use per character per match.
+                One ability use for your whole team per fight.
               </p>
               <label>
                 Ability stat
@@ -361,15 +361,15 @@ export function BattlePage({
                 className="secondary"
                 disabled={
                   battle.turn !== "player" ||
-                  battle.usedAbilities?.includes(pc.id)
+                  (battle.usedAbilities?.length || 0) > 0
                 }
                 onClick={() => {
                   setBattle(activateAbility(battle, abilityStat));
                   audio.play("energy");
                 }}
               >
-                {battle.usedAbilities?.includes(pc.id)
-                  ? "Ability used"
+                {(battle.usedAbilities?.length || 0) > 0
+                  ? "Fight boost used"
                   : "Activate ability"}
               </button>
             </div>

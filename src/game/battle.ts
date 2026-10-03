@@ -261,7 +261,7 @@ export function activateAbility(
     b.last ||
     b.result ||
     b.turn !== "player" ||
-    b.usedAbilities?.includes(id)
+    (b.usedAbilities?.length || 0) > 0
   )
     return b;
   const next = structuredClone(b);

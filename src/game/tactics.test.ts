@@ -8,12 +8,14 @@ import {
 } from "./battle";
 import { campaignBattle, claimChapter, campaignStars } from "./adventures";
 import { characters } from "../data/characters";
-it("limits abilities to one use per character and one round", () => {
+it("limits the whole team to one ability per fight, even after changing characters", () => {
   const s = newSave("Player", "rangers", "rangers-0");
   const b = campaignBattle(s, "arrival", "starter")!;
   const activated = activateAbility(b, "combat");
   expect(activated.usedAbilities).toEqual(["rangers-0"]);
   expect(activateAbility(activated, "tech")).toBe(activated);
+  const later = { ...activated, round: 1, player: ["rangers-1"] };
+  expect(activateAbility(later, "tech")).toBe(later);
   const base = characters[0].baseStats;
   expect(combatStats(activated, "rangers-0", base).combat).toBe(
     base.combat + 8,

@@ -104,11 +104,12 @@ Scout packs cost 180 earned coins (level 1, 75% Common / 25% Uncommon). Hero pac
 
 ## Battle tactics and campaign mastery
 
-Each participating character has one ability use per match, activated on the player's turn before choosing an attack. Rick recalibrates a selected stat to 70–100 (may lower it); Batman reveals one chosen opponent attribute; Green Ranger gains 12 durability and 6 combat for the current round; other characters focus a selected stat for +8. Temporary effects cap at 100 and expire next round. Rita curses a rotating attribute for -8, Ultron adapts to the previous round's stat for +10, and Joker swaps power/intelligence every other round. Revealed enemy values are saved with the round result so later adaptations do not change the reported outcome.
+The whole team shares one ability use per fight, activated on the player's turn before choosing an attack. Rick recalibrates a selected stat to 70–100 (may lower it); Batman reveals one chosen opponent attribute; Green Ranger gains 12 durability and 6 combat for the current round; other characters focus a selected stat for +8. Temporary effects cap at 100 and expire next round. Rita curses a rotating attribute for -8, Ultron adapts to the previous round's stat for +10, and Joker swaps power/intelligence every other round. Revealed enemy values are saved with the round result so later adaptations do not change the reported outcome.
 
 Campaign wins earn 1–3 stars: 1 for victory, 2 for at least 75% rounds won, 3 for a clean sweep. Only increases in a chapter's best rating pay mastery rewards (50 coins and 1 material per new star). Ratings persist across reload/import and old cleared chapters remain cleared; replay them to earn stars. No rewards for an unfinished battle or loss. First-clear rewards are separate and remain one-time.
 
 ## Next development
 
 The intended extension points support online accounts/cloud saves, authoritative multiplayer, tournaments, seasons, leaderboards, trading, richer animation/audio, mobile packaging and a backend admin catalogue. Add schema migration before changing the save contract. Before any public release, review character-name/franchise permissions and supply licensed artwork, balance long-term progression and test target mobile install behaviour.
+
 
