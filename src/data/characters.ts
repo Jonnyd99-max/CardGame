@@ -1,4 +1,6 @@
 import type { Character, Rarity, Stats } from "../types";
+import { statKeys } from "../types";
+import { characterStats } from "./characterStats";
 const entries: [string, string, string, string][] = [
   ["rangers", "morphin", "Red Ranger", "Courage at the heart of every battle."],
   ["rangers", "morphin", "Blue Ranger", "A brilliant mind behind the visor."],
@@ -91,25 +93,7 @@ const colors = [
 export const characters: Character[] = entries.map(
   ([franchise, group, name, description], i) => {
     const n = i % 8;
-    const vals = Array.from({ length: 8 }, (_, s) =>
-      Math.min(95, 48 + ((i * 13 + s * 17) % 35) + n),
-    );
-    if (n === 1) vals[2] = 92;
-    if (n === 2) vals[1] = 91;
-    if (n === 6) vals[0] = 94;
-    const keys = [
-      "strength",
-      "speed",
-      "intelligence",
-      "combat",
-      "durability",
-      "power",
-      "special",
-      "tech",
-    ];
-    const baseStats = Object.fromEntries(
-      keys.map((k, s) => [k, vals[s]]),
-    ) as Stats;
+    const baseStats = { ...characterStats[`${franchise}-${n}`] };
     return {
       id: `${franchise}-${n}`,
       name,
@@ -129,7 +113,7 @@ export const characters: Character[] = entries.map(
       baseLevel: 1,
       maxLevel: 30,
       baseStats,
-      maxStats: Object.fromEntries(keys.map((k) => [k, 100])) as Stats,
+      maxStats: Object.fromEntries(statKeys.map((k) => [k, 100])) as Stats,
       abilities: ["signature", "focus"],
       compatibleWeapons: ["pulse-blade", "blaster"],
       compatibleEquipment:
@@ -139,7 +123,7 @@ export const characters: Character[] = entries.map(
       theme: franchise,
       tags: [
         n === 7 ? "villain" : "hero",
-        n === 1 ? "intelligence" : "balanced",
+        [...statKeys].sort((a, b) => baseStats[b] - baseStats[a])[0],
       ],
       color:
         franchise === "rangers"
