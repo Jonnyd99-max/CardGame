@@ -94,6 +94,14 @@ Production builds include a generated manifest and Workbox service worker. After
 
 Vitest covers stat comparison, capture/tie logic, majority wins, AI stat selection, match/character rewards, XP levels, unlocks, equipment/ability modifiers and caps, compatibility, deck constraints, save round trips and malformed imports, and period resets. Build performs strict TypeScript checking before bundling.
 
+## Campaign, bosses and packs
+
+Campaign contains five ordered Angel Grove chapters at player levels 1, 3, 5, 8 and 12. The Thor and Lord Zedd boss chapters play every round so all three phases occur; enemy stats rise by 3 in each phase, capped at 100. First clears award coins, XP, materials and a personal weapon. Lord Zedd also unlocks Green Ranger early as a campaign reward. Replays award normal match prizes; first-clear rewards are never repeated. Existing saves gain optional campaign and pack counters without resetting progress; import validates chapter order and counters.
+
+Ranger synergy uses unique Rangers in the participating deck, excluding Lord Zedd: three Rangers grant +2 combat/power, five grant +4. Each equipped personal weapon adds +1 combat for the Ranger team, capped at +3. Bonuses apply only to Rangers, cap at 100 and are reflected in battle cards and comparison values.
+
+Scout packs cost 180 earned coins (level 1, 75% Common / 25% Uncommon). Hero packs cost 350 (level 5, 45% Common / 35% Uncommon / 20% Rare). Each contains one card and 1 or 2 materials. Only cards with effective unlock levels at most two above the player level are eligible; unavailable rarity pools fall back to Common. No Epic/Legendary/Mythic cards are in packs. Duplicates give 25% coin refunds, 2 extra materials and 20 card XP. Randomness is local; no real-money purchases.
+
 ## Next development
 
-The intended extension points support online accounts/cloud saves, authoritative multiplayer, packs, tournaments, seasons, leaderboards, trading, richer animation/audio, mobile packaging and a backend admin catalogue. Add schema migration before changing the save contract. Before any public release, review character-name/franchise permissions and supply licensed artwork, balance long-term progression and test target mobile install behaviour.
+The intended extension points support online accounts/cloud saves, authoritative multiplayer, tournaments, seasons, leaderboards, trading, richer animation/audio, mobile packaging and a backend admin catalogue. Add schema migration before changing the save contract. Before any public release, review character-name/franchise permissions and supply licensed artwork, balance long-term progression and test target mobile install behaviour.

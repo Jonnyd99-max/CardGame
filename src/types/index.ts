@@ -71,6 +71,8 @@ export interface Deck {
   rule: DeckRule;
 }
 export interface Save {
+  campaign?: string[];
+  packsOpened?: number;
   balanceVersion?: number;
   starterFranchise?: string;
   presentationVersion?: number;

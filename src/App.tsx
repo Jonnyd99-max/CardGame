@@ -19,6 +19,8 @@ import {
 import { Home } from "./pages/Home";
 import { Collection } from "./pages/Collection";
 import { BattlePage } from "./pages/Battle";
+import { Campaign, Packs } from "./pages/Adventures";
+import { claimChapter } from "./game/adventures";
 import { CharacterDetail } from "./pages/CharacterDetail";
 import { Upgrades, Equipment, Rewards, Challenges } from "./pages/Progression";
 import { Decks } from "./pages/Decks";
@@ -39,6 +41,9 @@ import type { Save } from "./types";
 const nav = [
   ["Home", HomeIcon],
   ["Play", Swords],
+  ["Campaign", Target],
+  ["Boss Battles", Swords],
+  ["Card Packs", Gift],
   ["My Collection", Layers],
   ["Teams / Groups", Users],
   ["My Decks", Box],
@@ -306,6 +311,19 @@ export default function App() {
                 navigate("Home");
               }}
             />
+          ) : current === "Campaign" || current === "Boss Battles" ? (
+            <Campaign
+              save={save}
+              bosses={current === "Boss Battles"}
+              complete={(b) =>
+                update((s) => {
+                  claimChapter(s, b);
+                  rewardMatch(s, b);
+                })
+              }
+            />
+          ) : current === "Card Packs" ? (
+            <Packs save={save} update={update} />
           ) : current === "Upgrade" ? (
             <Upgrades save={save} detail={setDetail} />
           ) : current === "Equipment" ? (

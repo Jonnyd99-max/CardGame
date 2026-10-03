@@ -2,7 +2,7 @@ import { Lock, Star } from "lucide-react";
 import { rarities } from "../data/rarities";
 import { franchises } from "../data/franchises";
 import { powerFor, statsFor, unlockLevelFor } from "../game/progression";
-import type { Character, Save } from "../types";
+import type { Character, Save, Stats } from "../types";
 import { items } from "../game/progression";
 import { ItemArtwork } from "./ItemArtwork";
 import { assetUrl } from "../game/assetUrl";
@@ -98,6 +98,7 @@ export function Card({
   compact = false,
   locked = false,
   hideStats = false,
+  battleValues,
 }: {
   character: Character;
   save: Save;
@@ -105,9 +106,10 @@ export function Card({
   compact?: boolean;
   locked?: boolean;
   hideStats?: boolean;
+  battleValues?: Stats;
 }) {
   const p = s.cards[c.id];
-  const stats = statsFor(c, s);
+  const stats = battleValues || statsFor(c, s);
   const loadout = locked
     ? []
     : (p?.equipment || [])
@@ -168,7 +170,13 @@ export function Card({
         )}
         {!hideStats && (
           <div className="power-badge">
-            <strong>{powerFor(c, s)}</strong>
+            <strong>
+              {battleValues
+                ? Math.round(
+                    Object.values(stats).reduce((a, b) => a + b, 0) / 8,
+                  )
+                : powerFor(c, s)}
+            </strong>
             <small>POWER</small>
           </div>
         )}

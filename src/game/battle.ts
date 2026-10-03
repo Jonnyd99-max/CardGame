@@ -1,6 +1,7 @@
 import { characters } from "../data/characters";
 import { statsFor, grantXP, refreshPeriods } from "./progression";
 import { progression } from "../data/unlocks";
+import { battleStats } from "./adventures";
 import {
   statKeys,
   type Stats,
@@ -33,6 +34,8 @@ export function aiStat(
   )[0];
 }
 export interface Battle {
+  chapter?: string;
+  boss?: boolean;
   mode: Mode;
   difficulty: Difficulty;
   target: number;
@@ -151,8 +154,8 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
   const next = structuredClone(b);
   const p = characters.find((c) => c.id === b.player[0])!,
     a = characters.find((c) => c.id === b.ai[0])!;
-  const ps = statsFor(p, s),
-    as = a.baseStats;
+  const ps = battleStats(p.id, statsFor(p, s), b.participants, s),
+    as = opponentStats(b, a.baseStats);
   const winner = compare(ps[stat], as[stat]);
   next.round++;
   next.last = {
@@ -209,6 +212,12 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
             : "ai";
   }
   return next;
+}
+export function opponentStats(b: Battle, base: Stats): Stats {
+  const phase = b.boss ? Math.min(2, Math.floor(b.round / 3)) : 0;
+  return Object.fromEntries(
+    statKeys.map((k) => [k, Math.min(100, base[k] + phase * 3)]),
+  ) as Stats;
 }
 export function rewardMatch(s: Save, b: Battle) {
   if (!b.result) return s;

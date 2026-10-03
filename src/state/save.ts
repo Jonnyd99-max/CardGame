@@ -11,6 +11,7 @@ import {
   migrateBalance,
 } from "../game/progression";
 import { statKeys, type Save } from "../types";
+import { chapters } from "../game/adventures";
 export const SAVE_KEY = "jd-multiverse-v1";
 export function newSave(
   name: string,
@@ -173,6 +174,14 @@ export function parseSave(raw: string): Save {
   )
     fail();
   if (s.owned.some((id) => !s.cards[id])) fail();
+  if (s.packsOpened !== undefined && !integer(s.packsOpened)) fail();
+  if (
+    s.campaign !== undefined &&
+    (!stringArray(s.campaign) ||
+      new Set(s.campaign).size !== s.campaign.length ||
+      s.campaign.some((id, i) => chapters[i]?.id !== id))
+  )
+    fail();
   for (const id of Object.keys(s.cards)) {
     const c = characters.find((c) => c.id === id)!;
     if (!c) fail();

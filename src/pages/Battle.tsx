@@ -9,31 +9,41 @@ import {
   playRound,
   aiStat,
   matchPrizes,
+  opponentStats,
   type Battle as Match,
 } from "../game/battle";
 import { statsFor, validateDeck } from "../game/progression";
+import { battleStats, rangerBonus, chapters } from "../game/adventures";
 import { statKeys, type Save, type Mode, type Difficulty } from "../types";
 export function BattlePage({
   save: s,
   onComplete,
   tutorial = false,
   onExit,
+  initialBattle,
 }: {
   save: Save;
   onComplete: (b: Match) => void;
   tutorial?: boolean;
   onExit: () => void;
+  initialBattle?: Match;
 }) {
   const [mode, setMode] = useState<Mode>("Quick Battle"),
     [difficulty, setDifficulty] = useState<Difficulty>("Normal"),
     [rounds, setRounds] = useState(5),
     [deck, setDeck] = useState(s.activeDeck),
-    [battle, setBattle] = useState<Match | null>(() =>
-      tutorial
-        ? createBattle(s.decks[0].cards, "Quick Battle", "Easy", 3, true)
-        : null,
+    [battle, setBattle] = useState<Match | null>(
+      () =>
+        initialBattle ||
+        (tutorial
+          ? createBattle(s.decks[0].cards, "Quick Battle", "Easy", 3, true)
+          : null),
     ),
     [paid, setPaid] = useState(false);
+  const [chapterAlreadyCleared] = useState(
+    () =>
+      !!initialBattle?.chapter && !!s.campaign?.includes(initialBattle.chapter),
+  );
   function resolve(stat: (typeof statKeys)[number]) {
     if (!battle || battle.last || battle.result) return;
     const next = playRound(battle, stat, s);
@@ -197,7 +207,8 @@ export function BattlePage({
     ac =
       characters.find((c) => c.id === (battle.last?.aiId || battle.ai[0])) ||
       characters[0],
-    ps = statsFor(pc, s),
+    ps = battleStats(pc.id, statsFor(pc, s), battle.participants, s),
+    opponent = opponentStats(battle, ac.baseStats),
     prizes = matchPrizes(battle);
   return (
     <div className="arena">
@@ -207,7 +218,13 @@ export function BattlePage({
         </button>
         <div>
           <span className="eyebrow">{themes[s.franchise].arena}</span>
-          <h2>{battle.tutorial ? "Training grounds" : battle.mode}</h2>
+          <h2>
+            {battle.chapter
+              ? chapters.find((c) => c.id === battle.chapter)?.name
+              : battle.tutorial
+                ? "Training grounds"
+                : battle.mode}
+          </h2>
         </div>
         <span className="pill">{battle.difficulty} AI</span>
       </div>
@@ -216,6 +233,24 @@ export function BattlePage({
           It’s morphin time! Pick one of your strongest stats. Your opponent’s
           stats are secret until the fight. Highest value wins; the winner
           chooses next.
+        </div>
+      )}
+      {battle.boss && (
+        <div className="tutorial-banner">
+          Boss phase{" "}
+          {Math.min(
+            3,
+            1 + Math.floor((battle.last ? battle.round - 1 : battle.round) / 3),
+          )}{" "}
+          / 3 · Enemy stats rise by 3 each phase. Win the majority of{" "}
+          {battle.target} rounds.
+        </div>
+      )}
+      {rangerBonus(battle.participants, s).total > 0 && (
+        <div className="tip">
+          Ranger synergy: +{rangerBonus(battle.participants, s).total} combat
+          and +{rangerBonus(battle.participants, s).team} power for your
+          Rangers. Battle values include this bonus.
         </div>
       )}
       <div className="scoreboard">
@@ -241,7 +276,12 @@ export function BattlePage({
         </div>
       </div>
       <div className="battle-layout">
-        <Card key={`p-${pc.id}-${battle.round}`} character={pc} save={s} />
+        <Card
+          key={`p-${pc.id}-${battle.round}`}
+          character={pc}
+          save={s}
+          battleValues={ps}
+        />
         <div className="stat-choices">
           <span className="eyebrow">
             {battle.last ? "ROUND REVEALED" : "SELECT YOUR STRONGEST STAT"}
@@ -258,14 +298,22 @@ export function BattlePage({
               <strong>{ps[k]}</strong>
               <span>{k === "special" ? "Special ability" : k}</span>
               <b aria-label={battle.last ? undefined : "Opponent stat hidden"}>
-                {battle.last ? ac.baseStats[k] : "?"}
+                {battle.last
+                  ? Math.min(
+                      100,
+                      ac.baseStats[k] +
+                        (battle.boss
+                          ? Math.min(2, Math.floor((battle.round - 1) / 3)) * 3
+                          : 0),
+                    )
+                  : "?"}
               </b>
             </button>
           ))}
           {battle.turn === "ai" && !battle.last && !battle.result && (
             <button
               className="primary"
-              onClick={() => resolve(aiStat(ac.baseStats, battle.difficulty))}
+              onClick={() => resolve(aiStat(opponent, battle.difficulty))}
             >
               Reveal AI selection
             </button>
@@ -296,6 +344,10 @@ export function BattlePage({
           character={ac}
           save={{ ...s, cards: {}, favourite: "" }}
           hideStats={!battle.last}
+          battleValues={opponentStats(
+            { ...battle, round: battle.last ? battle.round - 1 : battle.round },
+            ac.baseStats,
+          )}
         />
       </div>
       {battle.result && (
@@ -324,8 +376,22 @@ export function BattlePage({
               {prizes.bonusCoins} coins.
             </p>
           )}
+          {battle.chapter && battle.result === "player" && (
+            <p>
+              {chapterAlreadyCleared
+                ? "Replay complete. First-clear prizes were already claimed."
+                : (() => {
+                    const c = chapters.find((c) => c.id === battle.chapter)!;
+                    return `Chapter bonus: +${c.coins} coins · +${c.xp} XP · +${c.boss ? 4 : 2} materials · ${c.item.split("-").join(" ")}${"card" in c ? " + Green Ranger" : ""}. Awarded once.`;
+                  })()}
+            </p>
+          )}
           <button className="primary" onClick={onExit}>
-            {tutorial ? "Enter your home" : "Return home"}{" "}
+            {battle.chapter
+              ? "Return to campaign"
+              : tutorial
+                ? "Enter your home"
+                : "Return home"}{" "}
             <ArrowRight size={18} />
           </button>
         </section>

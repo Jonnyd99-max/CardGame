@@ -986,3 +986,99 @@ footer {
     text-shadow: 1px 1px #fff3bf;
   }
 }
+/* Campaign chapters and earned-coin packs */
+.sidebar nav {
+  min-height: 0;
+  overflow-y: auto;
+  flex: 1;
+  align-content: start;
+}
+.sidebar .brand,
+.sidebar .nav-caption,
+.sidebar-bottom {
+  flex-shrink: 0;
+}
+.adventure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin: 22px 0;
+}
+.adventure-deck {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+}
+.adventure-deck label {
+  min-width: 180px;
+  display: grid;
+  gap: 8px;
+}
+.chapter-card {
+  overflow: hidden;
+}
+.chapter-art {
+  height: 200px;
+  position: relative;
+  background: #f7cf49;
+  border: 3px solid #202027;
+  overflow: hidden;
+}
+.chapter-art .character-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.chapter-art .artwork-sheet {
+  width: 180px;
+  margin: auto;
+}
+.chapter-art .pill {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  background: #fff9eb;
+}
+.chapter-prize {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0;
+}
+.chapter-prize .item-artwork {
+  width: 70px;
+  height: 70px;
+  flex-shrink: 0;
+}
+.chapter-locked {
+  opacity: 0.72;
+}
+.chapter-card p,
+.pack-card p {
+  line-height: 1.6;
+}
+.pack-mark {
+  display: block;
+  font-size: 80px;
+  color: #ce3546;
+  text-shadow: 3px 3px #24232b;
+}
+.pack-reveal {
+  max-width: 480px;
+  margin: 24px auto;
+  text-align: center;
+}
+.pack-reveal .character-card {
+  max-width: 280px;
+  margin: 18px auto;
+}
+@media (max-width: 650px) {
+  .adventure-grid {
+    grid-template-columns: 1fr;
+  }
+  .adventure-deck {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+}
