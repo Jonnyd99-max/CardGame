@@ -8,6 +8,7 @@ import {
   ritaCurse,
   availableStats,
   aiStat,
+  abilityNotices,
 } from "./battle";
 import { campaignBattle, claimChapter, campaignStars } from "./adventures";
 import { characters } from "../data/characters";
@@ -119,6 +120,41 @@ it("locks stat choices per side across cards and rejects repeats", () => {
     "tech",
   );
   expect(aiStat(characters[0].baseStats, "Easy", () => 0, [])).toBeUndefined();
+});
+it("announces active abilities and preserves Ultron's previous-stat announcement after the fight", () => {
+  const s = newSave("Player", "rangers", "rangers-0");
+  const b = campaignBattle(s, "arrival", "starter")!;
+  const ultron = {
+    ...b,
+    chapter: "ultron",
+    boss: true,
+    round: 3,
+    bossMemory: "speed" as const,
+  };
+  const fought = playRound(ultron, "combat", s);
+  expect(abilityNotices(fought)).toEqual(abilityNotices(ultron));
+  expect(
+    fought.log.some(
+      (l) => l.includes("Adaptive Armour") && l.includes("speed"),
+    ),
+  ).toBe(true);
+  expect(
+    abilityNotices({ ...fought, last: undefined }).some((n) =>
+      n.description.includes("combat gains +10"),
+    ),
+  ).toBe(true);
+  expect(abilityNotices({ ...b, chapter: "joker", round: 1 })[0].stats).toEqual(
+    ["power", "intelligence"],
+  );
+  expect(abilityNotices({ ...b, chapter: "joker", round: 2 })).toEqual([]);
+  for (const id of ["rick-6", "dc-0", "rangers-6", "rangers-0"]) {
+    const activated = activateAbility({ ...b, player: [id] }, "tech", () => 0);
+    expect(abilityNotices(activated)[0].side).toBe("player");
+    expect(activated.log[0]).toContain(
+      abilityNotices(activated)[0].description,
+    );
+    expect(abilityNotices({ ...activated, round: 1 })).toEqual([]);
+  }
 });
 it("hands off exhausted choices and ends long fights when both sides run out", () => {
   const s = newSave("Player", "rangers", "rangers-0");

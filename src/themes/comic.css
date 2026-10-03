@@ -1206,6 +1206,15 @@ footer {
 .curse-banner p {
   color: #53296e;
 }
+.ability-banner-player {
+  border-color: #176b44;
+  background: #d8f5df;
+  color: #176b44;
+  box-shadow: 4px 4px #176b44;
+}
+.ability-banner-player p {
+  color: #176b44;
+}
 .stat-choices button.cursed-stat {
   border: 3px solid #78399c;
   background: #edddfa;

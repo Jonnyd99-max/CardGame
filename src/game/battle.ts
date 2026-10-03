@@ -68,6 +68,7 @@ export interface Battle {
     playerId: string;
     aiId: string;
     enemyStats?: Stats;
+    abilityNotices?: AbilityNotice[];
   };
   log: string[];
   strengthWins: number;
@@ -187,16 +188,15 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
     playerId: p.id,
     aiId: a.id,
     enemyStats: as,
+    abilityNotices: abilityNotices(b),
   };
   next.bossMemory = stat;
   next.log.unshift(
     `${p.name} ${ps[stat]} · ${a.name} ${as[stat]} — ${stat}: ${winner === "draw" ? "tie" : winner === "player" ? "you win" : "opponent wins"}`,
   );
-  const curse = ritaCurse(b);
-  if (curse)
-    next.log.unshift(
-      `Rita casts Moon Curse: your ${curse} is reduced by 8 for this round.`,
-    );
+  abilityNotices(b)
+    .filter((n) => n.side === "ai")
+    .forEach((n) => next.log.unshift(`${n.title}: ${n.description}`));
   if (winner !== "draw") {
     next.scores[winner === "player" ? 0 : 1]++;
     next.turn = winner;
@@ -274,6 +274,65 @@ export function abilityName(id: string) {
         ? "Dragon Shield"
         : "Signature focus";
 }
+export interface AbilityNotice {
+  title: string;
+  description: string;
+  side: "player" | "ai";
+  stats: Stat[];
+}
+export function abilityNotices(b: Battle): AbilityNotice[] {
+  if (b.last?.abilityNotices) return b.last.abilityNotices;
+  const notices: AbilityNotice[] = [];
+  const curse = ritaCurse(b);
+  if (curse)
+    notices.push({
+      title: "Rita casts Moon Curse!",
+      description: `Your ${curse} is reduced by 8 this round.`,
+      side: "ai",
+      stats: [curse],
+    });
+  if (b.chapter === "ultron" && b.bossMemory)
+    notices.push({
+      title: "Ultron activates Adaptive Armour!",
+      description: `Opponent ${b.bossMemory} gains +10 this round (maximum 100).`,
+      side: "ai",
+      stats: [b.bossMemory],
+    });
+  if (b.chapter === "joker" && b.round % 2 === 1)
+    notices.push({
+      title: "Joker uses Chaos Swap!",
+      description: "Opponent power and intelligence are swapped this round.",
+      side: "ai",
+      stats: ["power", "intelligence"],
+    });
+  const phase = b.boss ? Math.min(2, Math.floor(b.round / 3)) : 0;
+  if (phase)
+    notices.push({
+      title: `Boss powers up — phase ${phase + 1}!`,
+      description: `All opponent stats gain +${phase * 3} this phase (maximum 100).`,
+      side: "ai",
+      stats: [...statKeys],
+    });
+  const a = b.abilityRound;
+  if (a && a.round === b.round) {
+    const name =
+      battleCharacters.find((c) => c.id === a.character)?.name ||
+      "Your character";
+    notices.push({
+      title: `${name} uses ${abilityName(a.character)}!`,
+      description: a.reveal
+        ? `Opponent ${a.stat} is revealed this round.`
+        : a.shield
+          ? "Your durability gains +12 and combat gains +6 this round (maximum 100)."
+          : a.value !== undefined
+            ? `Your ${a.stat} is rerolled to ${a.value} this round.`
+            : `Your ${a.stat} gains +8 this round (maximum 100).`,
+      side: "player",
+      stats: a.shield ? ["durability", "combat"] : [a.stat],
+    });
+  }
+  return notices;
+}
 export function activateAbility(
   b: Battle,
   stat: Stat,
@@ -301,7 +360,8 @@ export function activateAbility(
           ? { shield: true }
           : {}),
   };
-  next.log.unshift(`${abilityName(id)} activated for ${stat}.`);
+  const notice = abilityNotices(next).find((n) => n.side === "player")!;
+  next.log.unshift(`${notice.title}: ${notice.description}`);
   return next;
 }
 export function combatStats(b: Battle, id: string, base: Stats): Stats {

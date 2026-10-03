@@ -15,8 +15,8 @@ import {
   activateAbility,
   abilityName,
   combatStats,
-  ritaCurse,
   availableStats,
+  abilityNotices,
   type Battle as Match,
 } from "../game/battle";
 import { statsFor, validateDeck } from "../game/progression";
@@ -328,15 +328,21 @@ export function BattlePage({
           </span>
         </div>
       </div>
-      {ritaCurse(battle) && (
-        <div className="curse-banner" role="status">
-          <strong>RITA CASTS MOON CURSE!</strong>
+      {abilityNotices(battle).map((notice) => (
+        <div
+          key={notice.title}
+          className={`curse-banner ability-banner-${notice.side}`}
+          role="status"
+        >
+          <strong>{notice.title}</strong>
           <p>
-            Your {ritaCurse(battle)} is reduced by 8 this round. The highlighted
-            battle value already includes the curse.
+            {notice.description}{" "}
+            {notice.side === "player"
+              ? "Your team’s fight boost has been used."
+              : "Enemy ability active."}
           </p>
         </div>
-      )}
+      ))}
       <div className="battle-layout">
         <Card
           key={`p-${pc.id}-${battle.round}`}
@@ -394,16 +400,6 @@ export function BattlePage({
             </div>
           )}
 
-          {battle.chapter === "ultron" && (
-            <p className="tip">
-              Ultron adapts: +10 defence against your previous stat choice.
-            </p>
-          )}
-          {battle.chapter === "joker" && (
-            <p className="tip">
-              Joker swaps power and intelligence every other round.
-            </p>
-          )}
           <span className="eyebrow">
             {battle.last ? "ROUND REVEALED" : "SELECT YOUR STRONGEST STAT"}
           </span>
@@ -416,7 +412,7 @@ export function BattlePage({
                 !availableStats(battle, "player").includes(k)
               }
               key={k}
-              className={`${battle.last?.stat === k ? "chosen" : ""} ${ritaCurse(battle) === k ? "cursed-stat" : ""}`}
+              className={`${battle.last?.stat === k ? "chosen" : ""} ${abilityNotices(battle).some((n) => n.stats.includes(k)) ? "cursed-stat" : ""}`}
               onClick={() => resolve(k)}
             >
               <strong>{ps[k]}</strong>
@@ -424,6 +420,9 @@ export function BattlePage({
                 {k === "special" ? "Special ability" : k}
                 {battle.usedStats?.player.includes(k) ? " · Used by you" : ""}
                 {battle.usedStats?.ai.includes(k) ? " · Used by opponent" : ""}
+                {abilityNotices(battle).some((n) => n.stats.includes(k))
+                  ? " · Ability active"
+                  : ""}
               </span>
               <b
                 aria-label={
