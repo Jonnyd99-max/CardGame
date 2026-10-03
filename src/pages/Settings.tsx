@@ -150,13 +150,20 @@ export function Settings({
           <h2>Motion & audio</h2>
           <button
             className="secondary"
-            disabled={!s.settings.sound}
-            onClick={() => {
-              audio.enabled = s.settings.sound;
-              audio.play("matchWin");
+            onClick={async () => {
+              update((x) => {
+                x.settings.sound = true;
+              });
+              audio.enabled = true;
+              const played = await audio.play("matchWin");
+              notify(
+                played
+                  ? "Sound is enabled. Check device volume and whether this browser tab is muted if you cannot hear the test."
+                  : "The browser could not start audio. Try opening the game in Safari or Chrome, then tap Test sound again.",
+              );
             }}
           >
-            Test sound
+            Enable and test sound
           </button>
           {(["animations", "reducedMotion", "sound"] as const).map((k) => (
             <label className="toggle" key={k}>

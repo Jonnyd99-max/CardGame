@@ -13,16 +13,28 @@ export class AudioService {
   register(event: AudioEvent, url: string) {
     this.assets[event] = url;
   }
-  play(event: AudioEvent) {
-    if (!this.enabled || typeof window === "undefined") return;
+  async play(event: AudioEvent): Promise<boolean> {
+    if (!this.enabled || typeof window === "undefined") return false;
     const url = this.assets[event];
     if (url) {
-      void new Audio(url).play().catch(() => {});
-      return;
+      try {
+        await new Audio(url).play();
+        return true;
+      } catch {
+        return false;
+      }
     }
     try {
-      const ctx = (this.context ||= new AudioContext());
-      void ctx.resume().catch(() => {});
+      const AudioCtor =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext?: typeof AudioContext })
+          .webkitAudioContext;
+      if (!AudioCtor) return false;
+      if (!this.context || this.context.state === "closed")
+        this.context = new AudioCtor();
+      const ctx = this.context;
+      if (ctx.state !== "running") await ctx.resume();
+      if (ctx.state !== "running") return false;
       const notes: Record<AudioEvent, number[]> = {
         roundWin: [523, 784],
         roundLoss: [220, 110],
@@ -31,7 +43,7 @@ export class AudioService {
         unlock: [440, 660, 880],
         pack: [220, 330, 440, 880, 1320],
       };
-      const start = ctx.currentTime;
+      const start = ctx.currentTime + 0.03;
       notes[event].forEach((frequency, i) => {
         const oscillator = ctx.createOscillator(),
           gain = ctx.createGain();
@@ -39,7 +51,7 @@ export class AudioService {
         oscillator.type = event === "roundLoss" ? "sawtooth" : "triangle";
         oscillator.frequency.setValueAtTime(frequency, at);
         gain.gain.setValueAtTime(0, at);
-        gain.gain.linearRampToValueAtTime(0.06, at + 0.01);
+        gain.gain.linearRampToValueAtTime(0.18, at + 0.01);
         gain.gain.exponentialRampToValueAtTime(0.001, at + 0.18);
         oscillator.connect(gain);
         gain.connect(ctx.destination);
@@ -50,8 +62,9 @@ export class AudioService {
           gain.disconnect();
         };
       });
+      return true;
     } catch {
-      /* Gameplay remains available without audio support. */
+      return false;
     }
   }
 }
