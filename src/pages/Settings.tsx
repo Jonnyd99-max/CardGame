@@ -6,7 +6,7 @@ import { groups } from "../data/groups";
 import { parseSave } from "../state/save";
 import { Modal } from "../components/UI";
 import { selectUniverse } from "../game/progression";
-import { audio } from "../utils/audio";
+import { audio, audioEvents, type AudioEvent } from "../utils/audio";
 import { themes } from "../data/themes";
 import type { Save } from "../types";
 export function Settings({
@@ -28,6 +28,7 @@ export function Settings({
     [imported, setImported] = useState<Save | null>(null),
     [name, setName] = useState(s.name);
   const input = useRef<HTMLInputElement>(null);
+  const [soundSample, setSoundSample] = useState<AudioEvent>("matchWin");
   useEffect(() => setName(s.name), [s.name]);
   function exportSave() {
     const url = URL.createObjectURL(
@@ -148,6 +149,36 @@ export function Settings({
         </section>
         <section className="panel">
           <h2>Motion & audio</h2>
+          <label>
+            Preview a sound
+            <select
+              value={soundSample}
+              onChange={(e) => setSoundSample(e.target.value as AudioEvent)}
+            >
+              {audioEvents.map((event) => (
+                <option key={event} value={event}>
+                  {
+                    {
+                      impact: "Punch impact",
+                      whoosh: "Fast attack",
+                      blaster: "Blaster shot",
+                      energy: "Energy attack",
+                      roundWin: "Round victory",
+                      roundLoss: "Round defeat",
+                      draw: "Clash",
+                      matchWin: "Match victory",
+                      matchLoss: "Match defeat",
+                      upgrade: "Power upgrade",
+                      unlock: "Character unlock",
+                      pack: "Pack opening",
+                      equip: "Equip / acquire gear",
+                      reward: "Reward claim",
+                    }[event]
+                  }
+                </option>
+              ))}
+            </select>
+          </label>
           <button
             className="secondary"
             onClick={async () => {
@@ -155,7 +186,7 @@ export function Settings({
                 x.settings.sound = true;
               });
               audio.enabled = true;
-              const played = await audio.play("matchWin");
+              const played = await audio.play(soundSample);
               notify(
                 played
                   ? "Sound is enabled. Check device volume and whether this browser tab is muted if you cannot hear the test."

@@ -50,15 +50,25 @@ export function BattlePage({
     if (!battle || battle.last || battle.result) return;
     const next = playRound(battle, stat, s);
     audio.enabled = s.settings.sound;
-    audio.play(
+    const attackSound =
+      stat === "tech"
+        ? "blaster"
+        : stat === "speed"
+          ? "whoosh"
+          : stat === "special" || stat === "power"
+            ? "energy"
+            : "impact";
+    const resultSound =
       next.result === "player"
         ? "matchWin"
-        : next.last?.winner === "player"
-          ? "roundWin"
-          : next.last?.winner === "draw"
-            ? "unlock"
-            : "roundLoss",
-    );
+        : next.result === "ai"
+          ? "matchLoss"
+          : next.last?.winner === "player"
+            ? "roundWin"
+            : next.last?.winner === "draw"
+              ? "draw"
+              : "roundLoss";
+    void audio.play(attackSound).then(() => audio.play(resultSound, 0.35));
     setBattle(next);
     if (next.result && !paid) {
       setPaid(true);

@@ -63,6 +63,7 @@ export default function App() {
     [mobile, setMobile] = useState(false),
     [tutorial, setTutorial] = useState(false);
   const previousOwned = useRef(save?.owned.length || 0);
+  const previousAudioSave = useRef(save);
   useEffect(() => {
     if (
       save &&
@@ -72,10 +73,50 @@ export default function App() {
       setToast(
         `${save.owned.length - previousOwned.current} new legends unlocked. Find them in your collection.`,
       );
-      audio.play("unlock");
+      if (
+        save.packsOpened === previousAudioSave.current?.packsOpened &&
+        save.history[0]?.date === previousAudioSave.current?.history[0]?.date
+      )
+        audio.play("unlock");
     }
     previousOwned.current = save?.owned.length || 0;
   }, [save?.owned.length]);
+  useEffect(() => {
+    const old = previousAudioSave.current;
+    previousAudioSave.current = save;
+    if (
+      !save ||
+      !old ||
+      save.packsOpened !== old.packsOpened ||
+      save.history[0]?.date !== old.history[0]?.date
+    )
+      return;
+    audio.enabled = save.settings.sound;
+    const upgraded = Object.entries(save.cards).some(
+      ([id, p]) =>
+        old.cards[id] &&
+        (p.level !== old.cards[id].level ||
+          JSON.stringify(p.boosts) !== JSON.stringify(old.cards[id].boosts) ||
+          JSON.stringify(p.abilities) !==
+            JSON.stringify(old.cards[id].abilities)),
+    );
+    const equipped = Object.entries(save.cards).some(
+      ([id, p]) =>
+        old.cards[id] &&
+        JSON.stringify(p.equipment) !== JSON.stringify(old.cards[id].equipment),
+    );
+    if (upgraded) audio.play("upgrade");
+    else if (
+      equipped ||
+      JSON.stringify(save.items) !== JSON.stringify(old.items)
+    )
+      audio.play("equip");
+    else if (
+      save.claimed.length > old.claimed.length ||
+      save.daily !== old.daily
+    )
+      audio.play("reward");
+  }, [save]);
   useEffect(() => {
     const refresh = () =>
       setSave((current) => {
