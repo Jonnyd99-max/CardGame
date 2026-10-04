@@ -31,7 +31,9 @@ it("strengthens evolved abilities without giving extra activations", () => {
     Math.min(100, c.baseStats.combat + 12),
   );
   expect(activateAbility(focus, "tech")).toBe(focus);
-  expect(abilityNotices(focus)[0].description).toContain("+12");
+  expect(
+    abilityNotices(focus).find((n) => n.side === "player")?.description,
+  ).toContain("+12");
   const shield = activateAbility(
     { ...b, player: ["rangers-6"] },
     "combat",

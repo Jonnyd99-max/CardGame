@@ -37,6 +37,7 @@ export function aiStat(
   )[0];
 }
 export interface Battle {
+  opponentAbility?: { round: number; character: string; stat: Stat };
   usedStats?: { player: Stat[]; ai: Stat[] };
   usedAbilities?: string[];
   abilityRound?: {
@@ -170,6 +171,24 @@ export function createBattle(
 }
 export function playRound(b: Battle, stat: Stat, s: Save): Battle {
   if (b.result || b.last || !availableStats(b, b.turn).includes(stat)) return b;
+  const enemyId = b.ai[0];
+  if (
+    !b.opponentAbility &&
+    !ritaCurse(b) &&
+    !enemyHasPower(b, "ultron") &&
+    !enemyHasPower(b, "joker")
+  )
+    b = {
+      ...b,
+      opponentAbility: {
+        round: b.round,
+        character: enemyId,
+        stat: aiStat(
+          battleCharacters.find((c) => c.id === enemyId)!.baseStats,
+          "Hard",
+        )!,
+      },
+    };
   const next = structuredClone(b);
   next.usedStats ||= { player: [], ai: [] };
   next.usedStats[b.turn].push(stat);
@@ -263,11 +282,19 @@ export function opponentStats(b: Battle, base: Stats): Stats {
   const values = Object.fromEntries(
     statKeys.map((k) => [k, Math.min(100, base[k] + phase * 3)]),
   ) as Stats;
-  if (b.chapter === "ultron" && b.bossMemory)
+  if (enemyHasPower(b, "ultron") && b.bossMemory)
     values[b.bossMemory] = Math.min(100, values[b.bossMemory] + 10);
-  if (b.chapter === "joker" && b.round % 2 === 1)
+  if (enemyHasPower(b, "joker") && b.round % 2 === 1)
     [values.power, values.intelligence] = [values.intelligence, values.power];
+  if (b.opponentAbility?.round === b.round)
+    values[b.opponentAbility.stat] = Math.min(
+      100,
+      values[b.opponentAbility.stat] + 8,
+    );
   return values;
+}
+function enemyHasPower(b: Battle, name: string) {
+  return b.chapter === name || (b.last?.aiId || b.ai[0]) === `enemy-${name}`;
 }
 export function abilityName(id: string) {
   return id === "rick-6"
@@ -295,14 +322,14 @@ export function abilityNotices(b: Battle): AbilityNotice[] {
       side: "ai",
       stats: [curse],
     });
-  if (b.chapter === "ultron" && b.bossMemory)
+  if (enemyHasPower(b, "ultron") && b.bossMemory)
     notices.push({
       title: "Ultron activates Adaptive Armour!",
       description: `Opponent ${b.bossMemory} gains +10 this round (maximum 100).`,
       side: "ai",
       stats: [b.bossMemory],
     });
-  if (b.chapter === "joker" && b.round % 2 === 1)
+  if (enemyHasPower(b, "joker") && b.round % 2 === 1)
     notices.push({
       title: "Joker uses Chaos Swap!",
       description: "Opponent power and intelligence are swapped this round.",
@@ -318,6 +345,14 @@ export function abilityNotices(b: Battle): AbilityNotice[] {
       stats: [...statKeys],
     });
   const a = b.abilityRound;
+  const enemyAbility = b.opponentAbility;
+  if (enemyAbility?.round === b.round)
+    notices.push({
+      title: `${battleCharacters.find((c) => c.id === enemyAbility.character)?.name || "Opponent"} uses Battle Focus!`,
+      description: `Opponent ${enemyAbility.stat} gains +8 this round (maximum 100). Their team's one fight boost is now used.`,
+      side: "ai",
+      stats: [enemyAbility.stat],
+    });
   if (a && a.round === b.round) {
     const name =
       battleCharacters.find((c) => c.id === a.character)?.name ||

@@ -189,3 +189,47 @@ it("hands off exhausted choices and ends long fights when both sides run out", (
   expect(final.result).toBeDefined();
   expect(final.log[0]).toContain("Both sides have used every stat");
 });
+it("activates one automatic opponent boost per fight and shows its actual effect", () => {
+  const s = newSave("Player", "rangers", "rangers-0");
+  const b = {
+    ...campaignBattle(s, "arrival", "starter")!,
+    turn: "ai" as const,
+  };
+  const fought = playRound(b, "strength", s);
+  expect(fought.last?.b).toBe(48);
+  expect(fought.last?.enemyStats?.durability).toBe(60);
+  expect(
+    abilityNotices(fought).some(
+      (n) => n.title.includes("Battle Focus") && n.side === "ai",
+    ),
+  ).toBe(true);
+  expect(fought.log.some((l) => l.includes("Battle Focus"))).toBe(true);
+  const later = { ...fought, last: undefined, turn: "ai" as const };
+  expect(abilityNotices(later)).toEqual([]);
+  const second = playRound(later, "speed", s);
+  expect(second.last?.b).toBe(48);
+  expect(second.opponentAbility).toEqual(fought.opponentAbility);
+  const playerChoice = playRound({ ...b, turn: "player" }, "strength", s);
+  expect(playerChoice.opponentAbility?.stat).toBe("durability");
+  expect(playerChoice.last?.b).toBe(48);
+});
+it("shows Ultron and Joker powers outside their campaign chapters", () => {
+  const s = newSave("Player", "rangers", "rangers-0");
+  const b = campaignBattle(s, "arrival", "starter")!;
+  const ultron = {
+    ...b,
+    chapter: undefined,
+    ai: ["enemy-ultron"],
+    bossMemory: "speed" as const,
+    round: 1,
+  };
+  expect(opponentStats(ultron, characters[0].baseStats).speed).toBe(
+    characters[0].baseStats.speed + 10,
+  );
+  expect(abilityNotices(ultron)[0].title).toContain("Adaptive Armour");
+  const joker = { ...b, chapter: undefined, ai: ["enemy-joker"], round: 1 };
+  expect(opponentStats(joker, characters[0].baseStats).power).toBe(
+    characters[0].baseStats.intelligence,
+  );
+  expect(abilityNotices(joker)[0].title).toContain("Chaos Swap");
+});
