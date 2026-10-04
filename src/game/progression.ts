@@ -1,4 +1,4 @@
-import { characters } from "../data/characters";
+import { characters, getCharacter, getCharacters } from "../data/characters";
 import { equipment } from "../data/equipment";
 import { weapons } from "../data/weapons";
 import { abilities } from "../data/abilities";
@@ -34,7 +34,7 @@ export function unlockLevelFor(c: Character, s: Save) {
 }
 export function selectUniverse(s: Save, franchise: string) {
   s.franchise = franchise;
-  const owned = characters.find(
+  const owned = getCharacters(s).find(
     (c) => c.franchise === franchise && s.owned.includes(c.id),
   );
   const preview = owned || characters.find((c) => c.franchise === franchise)!;
@@ -49,7 +49,7 @@ export function migrateBalance(s: Save) {
     .map((c) => c.id);
   s.owned = s.owned.filter(
     (id) =>
-      unlockLevelFor(characters.find((c) => c.id === id)!, s) <=
+      (id === "custom-hero" ? 0 : unlockLevelFor(getCharacter(id, s)!, s)) <=
       playerLevel(s.xp),
   );
   for (const id of starters) {
@@ -66,7 +66,7 @@ export function migrateBalance(s: Save) {
   }
   if (!s.owned.includes(s.favourite)) {
     s.favourite = starters[0];
-    s.group = characters.find((c) => c.id === s.favourite)!.group;
+    s.group = getCharacter(s.favourite, s)!.group;
   }
   s.balanceVersion = 1;
   return s;
@@ -116,7 +116,7 @@ export function compatible(c: Character, item: Item) {
   );
 }
 export function toggleEquipment(s: Save, characterId: string, itemId: string) {
-  const c = characters.find((c) => c.id === characterId);
+  const c = getCharacter(characterId, s);
   const item = items.find((item) => item.id === itemId);
   const p = s.cards[characterId];
   if (
@@ -166,7 +166,7 @@ export function validateDeck(d: Deck, s: Save): string {
     d.cards.some((id) => !s.owned.includes(id))
   )
     return "Use unique, owned cards.";
-  const cs = d.cards.map((id) => characters.find((c) => c.id === id)!);
+  const cs = d.cards.map((id) => getCharacter(id, s)!);
   if (
     d.rule === "Single Franchise" &&
     new Set(cs.map((c) => c.franchise)).size > 1

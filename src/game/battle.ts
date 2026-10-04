@@ -1,4 +1,4 @@
-import { characters } from "../data/characters";
+import { characters, getCharacter } from "../data/characters";
 import { battleCharacters } from "../data/enemies";
 import { statsFor, grantXP, refreshPeriods } from "./progression";
 import { progression } from "../data/unlocks";
@@ -151,6 +151,7 @@ export function createBattle(
   difficulty: Difficulty,
   target = 5,
   tutorial = false,
+  save?: Save,
 ): Battle {
   const shuffled = [...characters];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -159,7 +160,7 @@ export function createBattle(
   }
   const opponents: string[] = [];
   for (const id of ids) {
-    const franchise = characters.find((c) => c.id === id)!.franchise;
+    const franchise = getCharacter(id, save)!.franchise;
     const candidate = shuffled.find(
       (c) =>
         !opponents.includes(c.id) &&
@@ -196,24 +197,18 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
       opponentAbility: {
         round: b.round,
         character: enemyId,
-        stat: aiStat(
-          battleCharacters.find((c) => c.id === enemyId)!.baseStats,
-          "Hard",
-        )!,
+        stat: aiStat(getCharacter(enemyId, s)!.baseStats, "Hard")!,
         ...uniqueEffect(
           enemyId,
-          aiStat(
-            battleCharacters.find((c) => c.id === enemyId)!.baseStats,
-            "Hard",
-          )!,
+          aiStat(getCharacter(enemyId, s)!.baseStats, "Hard")!,
         ),
       },
     };
   const next = structuredClone(b);
   next.usedStats ||= { player: [], ai: [] };
   next.usedStats[b.turn].push(stat);
-  const p = battleCharacters.find((c) => c.id === b.player[0])!,
-    a = battleCharacters.find((c) => c.id === b.ai[0])!;
+  const p = getCharacter(b.player[0], s)!,
+    a = getCharacter(b.ai[0], s)!;
   const ps = combatStats(
       b,
       p.id,
@@ -520,11 +515,9 @@ export function rewardMatch(s: Save, b: Battle) {
     s.periods.dailyWins++;
     s.periods.weeklyWins++;
     if (b.scores[1] === 0) s.perfectWins++;
-    new Set(
-      b.participants.map(
-        (id) => characters.find((c) => c.id === id)!.franchise,
-      ),
-    ).forEach((f) => (s.franchiseWins[f] = (s.franchiseWins[f] || 0) + 1));
+    new Set(b.participants.map((id) => getCharacter(id, s)!.franchise)).forEach(
+      (f) => (s.franchiseWins[f] = (s.franchiseWins[f] || 0) + 1),
+    );
   } else if (b.result === "ai") s.losses++;
   s.roundWins += b.scores[0];
   s.strengthWins += b.strengthWins;

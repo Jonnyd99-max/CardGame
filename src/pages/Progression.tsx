@@ -1,5 +1,5 @@
 import { Gift, Zap, Check, Trophy } from "lucide-react";
-import { characters } from "../data/characters";
+import { characters, getCharacters } from "../data/characters";
 import { progression } from "../data/unlocks";
 import { items, playerLevel, periodKeys, grantXP } from "../game/progression";
 import { challenges } from "../data/challenges";
@@ -14,6 +14,7 @@ export function Upgrades({
   save: Save;
   detail: (id: string) => void;
 }) {
+  const characters = getCharacters(save);
   return (
     <>
       <div className="page-heading">

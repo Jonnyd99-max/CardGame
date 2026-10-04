@@ -1,5 +1,5 @@
 import { progression } from "../data/unlocks";
-import { characters } from "../data/characters";
+import { getCharacters } from "../data/characters";
 import { franchises } from "../data/franchises";
 import { groups } from "../data/groups";
 import { Artwork } from "../components/Card";
@@ -8,6 +8,7 @@ import { playerLevel, unlockLevelFor } from "../game/progression";
 import { challenges } from "../data/challenges";
 import type { Save } from "../types";
 export function Profile({ save: s }: { save: Save }) {
+  const characters = getCharacters(s);
   const c = characters.find((c) => c.id === s.favourite)!;
   return (
     <>
@@ -92,6 +93,7 @@ export function Groups({
   save: Save;
   detail: (id: string) => void;
 }) {
+  const characters = getCharacters(s);
   return (
     <>
       <div className="page-heading">

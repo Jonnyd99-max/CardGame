@@ -1,4 +1,5 @@
-import { characters } from "../data/characters";
+import { characters, getCharacter } from "../data/characters";
+import { validHero, customHeroId } from "../game/customHeroes";
 import { franchises } from "../data/franchises";
 import { groups } from "../data/groups";
 import { abilities } from "../data/abilities";
@@ -105,11 +106,12 @@ export function parseSave(raw: string): Save {
     ].every((k) => integer(s[k as keyof Save]))
   )
     fail();
+  if (s.customHero !== undefined && !validHero(s.customHero)) fail();
   if (
     !stringArray(s.owned) ||
     !s.owned.length ||
     new Set(s.owned).size !== s.owned.length ||
-    s.owned.some((id) => !characters.some((c) => c.id === id))
+    s.owned.some((id) => !getCharacter(id, s))
   )
     fail();
   if (
@@ -128,6 +130,11 @@ export function parseSave(raw: string): Save {
     !record(s.settings) ||
     !record(s.periods) ||
     !record(s.franchiseWins)
+  )
+    fail();
+  if (
+    s.customHero &&
+    (!s.owned.includes(customHeroId) || !s.cards[customHeroId])
   )
     fail();
   if (
@@ -191,7 +198,7 @@ export function parseSave(raw: string): Save {
   )
     fail();
   for (const id of Object.keys(s.cards)) {
-    const c = characters.find((c) => c.id === id)!;
+    const c = getCharacter(id, s)!;
     if (!c) fail();
     const p = s.cards[id];
     if (

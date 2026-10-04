@@ -28,6 +28,7 @@ import { Settings } from "./pages/Settings";
 import { Profile, Groups } from "./pages/Profile";
 import { Onboarding } from "./pages/Onboarding";
 import { DevEditor } from "./pages/DevEditor";
+import { HeroCreator } from "./pages/HeroCreator";
 import { SaveRecovery } from "./pages/SaveRecovery";
 import { saveStorage, newSave } from "./state/save";
 import { playerLevel, refreshPeriods } from "./game/progression";
@@ -45,6 +46,7 @@ const nav = [
   ["Boss Battles", Swords],
   ["Card Packs", Gift],
   ["My Collection", Layers],
+  ["Make a Hero", User],
   ["Teams / Groups", Users],
   ["My Decks", Box],
   ["Upgrade", Zap],
@@ -336,6 +338,13 @@ export default function App() {
               save={save}
               detail={setDetail}
               initial={page.split(":")[1]}
+            />
+          ) : current === "Make a Hero" ? (
+            <HeroCreator
+              save={save}
+              update={update}
+              notify={setToast}
+              navigate={navigate}
             />
           ) : current === "Play" ? (
             <BattlePage

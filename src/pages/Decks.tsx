@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Plus, Trash2, Check, Layers } from "lucide-react";
-import { characters } from "../data/characters";
+import { getCharacter } from "../data/characters";
 import { validateDeck } from "../game/progression";
 import { Modal } from "../components/UI";
 import type { Save, Deck, DeckRule } from "../types";
@@ -47,9 +47,7 @@ export function Decks({
             <p>{d.cards.length} characters</p>
             <div className="deck-names">
               {d.cards.map((id) => (
-                <span key={id}>
-                  {characters.find((c) => c.id === id)?.name}
-                </span>
+                <span key={id}>{getCharacter(id, s)?.name}</span>
               ))}
             </div>
             <div className="button-row">
@@ -128,7 +126,7 @@ export function Decks({
                     })
                   }
                 />
-                {characters.find((c) => c.id === id)?.name}
+                {getCharacter(id, s)?.name}
               </label>
             ))}
           </div>

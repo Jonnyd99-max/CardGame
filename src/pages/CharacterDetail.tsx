@@ -1,5 +1,5 @@
 import { Star, ArrowRight, Lock } from "lucide-react";
-import { characters } from "../data/characters";
+import { getCharacter } from "../data/characters";
 import { progression } from "../data/unlocks";
 import { franchises } from "../data/franchises";
 import { groups } from "../data/groups";
@@ -32,7 +32,7 @@ export function CharacterDetail({
   update: (fn: (s: Save) => void) => void;
   notify: (text: string) => void;
 }) {
-  const c = characters.find((c) => c.id === id)!,
+  const c = getCharacter(id, s)!,
     owned = s.owned.includes(id),
     p = s.cards[id] || cardProgress(),
     stats = statsFor(c, s),

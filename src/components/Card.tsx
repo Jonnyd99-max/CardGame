@@ -8,7 +8,9 @@ import { ItemArtwork } from "./ItemArtwork";
 import { assetUrl } from "../game/assetUrl";
 import { evolutionFor, evolvedArtwork } from "../game/evolution";
 import { villainChapter } from "../game/villains";
+import { HeroArtwork } from "./HeroArtwork";
 export function Artwork({ character: c }: { character: Character }) {
+  if (c.customLook) return <HeroArtwork look={c.customLook} />;
   if (c.image && c.imageSheet) {
     const { columns, rows, index } = c.imageSheet;
     return (

@@ -2,6 +2,7 @@ import type { Character, Save } from "../types";
 
 export function evolvedArtwork(c: Character, stage: number): Character {
   if (!stage) return c;
+  if (c.customLook) return c;
   if (c.id.startsWith("enemy-") || !["rangers", "rick"].includes(c.franchise))
     return c;
   const index = Number(c.id.split("-").at(-1));
@@ -14,7 +15,17 @@ export function evolvedArtwork(c: Character, stage: number): Character {
 
 export function evolutionFor(c: Character, s: Save) {
   const level = s.owned.includes(c.id) ? s.cards[c.id]?.level || 1 : 1;
-  const stage = level >= 10 ? 2 : level >= 5 ? 1 : 0;
+  const stage = c.customLook
+    ? level >= 100
+      ? 2
+      : level >= 85
+        ? 1
+        : 0
+    : level >= 10
+      ? 2
+      : level >= 5
+        ? 1
+        : 0;
   const names: Record<string, string[]> = {
     rangers: ["Original form", "Armoured form", "Morphin Master"],
     marvel: ["Original form", "Heroic form", "Legendary form"],
@@ -24,6 +35,15 @@ export function evolutionFor(c: Character, s: Save) {
   return {
     stage,
     name: (names[c.franchise] || names.marvel)[stage],
-    nextLevel: stage === 0 ? 5 : stage === 1 ? 10 : undefined,
+    nextLevel:
+      stage === 0
+        ? c.customLook
+          ? 85
+          : 5
+        : stage === 1
+          ? c.customLook
+            ? 100
+            : 10
+          : undefined,
   };
 }

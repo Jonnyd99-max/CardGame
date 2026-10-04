@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
-import { characters } from "../data/characters";
+import { getCharacters } from "../data/characters";
 import { franchises } from "../data/franchises";
 import { groups } from "../data/groups";
 import { rarities } from "../data/rarities";
@@ -16,6 +16,7 @@ export function Collection({
   detail: (id: string) => void;
   initial?: string;
 }) {
+  const characters = getCharacters(save);
   const [search, setSearch] = useState(""),
     [franchise, setFranchise] = useState(initial),
     [rarity, setRarity] = useState(""),

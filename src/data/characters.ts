@@ -2,6 +2,8 @@ import type { Character, Rarity, Stats } from "../types";
 import { statKeys } from "../types";
 import { characterStats } from "./characterStats";
 import { rangerWeapons } from "./weapons";
+import { heroCharacter, customHeroId } from "../game/customHeroes";
+import type { Save } from "../types";
 const entries: [string, string, string, string][] = [
   ["rangers", "morphin", "Red Ranger", "Courage at the heart of every battle."],
   ["rangers", "morphin", "Blue Ranger", "A brilliant mind behind the visor."],
@@ -182,3 +184,9 @@ export const villains: Character[] = villainDefinitions.map(
   }),
 );
 export const characters = [...heroes, ...villains];
+export const getCharacters = (s: Save) =>
+  s.customHero ? [...characters, heroCharacter(s.customHero)] : characters;
+export const getCharacter = (id: string, s?: Save) =>
+  id === customHeroId && s?.customHero
+    ? heroCharacter(s.customHero)
+    : characters.find((c) => c.id === id);

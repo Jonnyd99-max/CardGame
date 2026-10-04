@@ -1444,3 +1444,108 @@ footer {
 .update-prompt .text-button {
   margin-left: 12px;
 }
+.hero-creator-layout {
+  display: grid;
+  grid-template-columns: minmax(230px, 330px) minmax(0, 1fr);
+  gap: 28px;
+}
+.hero-creator-preview {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+}
+.hero-creator-preview .battle-card {
+  width: 100%;
+}
+.hero-creator-layout .panel {
+  margin-bottom: 18px;
+}
+.hero-creator-layout label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin: 12px 0;
+}
+.hero-stat-editor > div {
+  display: grid;
+  grid-template-columns: 1fr 40px 45px 40px;
+  align-items: center;
+  gap: 8px;
+  margin: 9px 0;
+}
+.hero-stat-editor strong {
+  text-align: center;
+}
+.hero-stat-editor button {
+  border: 2px solid #252323;
+  background: #ffe795;
+  font-size: 22px;
+}
+.hero-composite {
+  position: relative !important;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  isolation: isolate;
+}
+.hero-composite > div {
+  position: absolute;
+  background-repeat: no-repeat;
+}
+.hero-backdrop {
+  inset: 0;
+}
+.hero-body {
+  top: 32%;
+  left: 3%;
+  width: 94%;
+  height: 68%;
+  z-index: 1;
+}
+.hero-head {
+  top: 0;
+  left: 26%;
+  width: 48%;
+  height: 38%;
+  z-index: 2;
+}
+@media (max-width: 700px) {
+  .hero-creator-layout {
+    grid-template-columns: 1fr;
+  }
+  .hero-creator-preview {
+    position: static;
+    max-width: 320px;
+    width: 100%;
+    margin: auto;
+  }
+}
+
+.hero-composite .hero-head {
+  top: 1%;
+  left: 36%;
+  width: 28%;
+  height: 32%;
+  overflow: hidden;
+  clip-path: polygon(
+    25% 0,
+    75% 0,
+    95% 15%,
+    100% 40%,
+    85% 78%,
+    65% 100%,
+    35% 100%,
+    15% 78%,
+    0 40%,
+    5% 15%
+  );
+}
+.hero-head > div {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 300%;
+  height: 280%;
+  background-repeat: no-repeat;
+}

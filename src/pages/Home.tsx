@@ -8,7 +8,7 @@ import {
   Layers,
   Zap,
 } from "lucide-react";
-import { characters } from "../data/characters";
+import { getCharacters } from "../data/characters";
 import { franchises } from "../data/franchises";
 import { Card, Artwork } from "../components/Card";
 import { Progress } from "../components/UI";
@@ -23,6 +23,7 @@ export function Home({
   navigate: (page: string) => void;
   detail: (id: string) => void;
 }) {
+  const characters = getCharacters(s);
   const fav =
     characters.find(
       (c) => c.id === s.favourite && c.franchise === s.franchise,

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Download, Upload } from "lucide-react";
-import { characters } from "../data/characters";
+import { getCharacters } from "../data/characters";
 import { franchises } from "../data/franchises";
 import { groups } from "../data/groups";
 import { parseSave } from "../state/save";
@@ -24,6 +24,7 @@ export function Settings({
   notify: (t: string) => void;
   install?: () => Promise<void>;
 }) {
+  const characters = getCharacters(s);
   const [confirm, setConfirm] = useState(false),
     [imported, setImported] = useState<Save | null>(null),
     [name, setName] = useState(s.name);

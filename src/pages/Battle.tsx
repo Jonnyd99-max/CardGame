@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { Swords, ArrowRight, Trophy } from "lucide-react";
-import { characters } from "../data/characters";
-import { battleCharacters } from "../data/enemies";
+import { characters, getCharacter } from "../data/characters";
 import { audio } from "../utils/audio";
 import { progression } from "../data/unlocks";
 import { themes } from "../data/themes";
@@ -52,7 +51,7 @@ export function BattlePage({
       () =>
         initialBattle ||
         (tutorial
-          ? createBattle(s.decks[0].cards, "Quick Battle", "Easy", 3, true)
+          ? createBattle(s.decks[0].cards, "Quick Battle", "Easy", 3, true, s)
           : null),
     ),
     [paid, setPaid] = useState(false);
@@ -98,7 +97,7 @@ export function BattlePage({
   useEffect(() => {
     if (!battle || battle.turn !== "ai" || battle.last || battle.result) return;
     const timer = window.setTimeout(() => {
-      const enemy = battleCharacters.find((c) => c.id === battle.ai[0]);
+      const enemy = getCharacter(battle.ai[0], s);
       if (!enemy) return;
       const stat = aiStat(
         opponentStats(battle, enemy.baseStats),
@@ -218,6 +217,8 @@ export function BattlePage({
                   mode,
                   difficulty,
                   rounds,
+                  false,
+                  s,
                 ),
               );
               setPaid(false);
@@ -260,13 +261,9 @@ export function BattlePage({
       </>
     );
   const pc =
-      battleCharacters.find(
-        (c) => c.id === (battle.last?.playerId || battle.player[0]),
-      ) || characters.find((c) => c.id === battle.participants[0])!,
-    ac =
-      battleCharacters.find(
-        (c) => c.id === (battle.last?.aiId || battle.ai[0]),
-      ) || characters[0],
+      getCharacter(battle.last?.playerId || battle.player[0], s) ||
+      getCharacter(battle.participants[0], s)!,
+    ac = getCharacter(battle.last?.aiId || battle.ai[0], s) || characters[0],
     ps = combatStats(
       battle,
       pc.id,

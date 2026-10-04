@@ -167,6 +167,8 @@ export function campaignBattle(
     stage.boss ? "Crossover Battle" : "Best of",
     stage.boss ? "Expert" : "Normal",
     stage.rounds,
+    false,
+    s,
   );
   b.ai = [...stage.opponents];
   b.chapter = id;

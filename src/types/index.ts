@@ -18,6 +18,7 @@ export type Rarity =
   | "Legendary"
   | "Mythic";
 export interface Character {
+  customLook?: { head: number; body: number; background: number };
   id: string;
   name: string;
   franchise: string;
@@ -71,6 +72,12 @@ export interface Deck {
   rule: DeckRule;
 }
 export interface Save {
+  customHero?: {
+    name: string;
+    franchise: string;
+    stats: Stats;
+    look: { head: number; body: number; background: number };
+  };
   campaign?: string[];
   campaignStars?: Record<string, number>;
   packsOpened?: number;
