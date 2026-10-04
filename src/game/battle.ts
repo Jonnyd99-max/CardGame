@@ -4,6 +4,12 @@ import { statsFor, grantXP, refreshPeriods } from "./progression";
 import { progression } from "../data/unlocks";
 import { battleStats } from "./adventures";
 import {
+  uniquePowers,
+  uniqueEffect,
+  uniqueDescription,
+  modifyStats,
+} from "./uniquePowers";
+import {
   statKeys,
   type Stats,
   type Stat,
@@ -37,7 +43,16 @@ export function aiStat(
   )[0];
 }
 export interface Battle {
-  opponentAbility?: { round: number; character: string; stat: Stat };
+  opponentAbility?: {
+    round: number;
+    character: string;
+    stat: Stat;
+    value?: number;
+    shield?: boolean;
+    modifiers?: Partial<Stats>;
+    enemyModifiers?: Partial<Stats>;
+    swapEnemy?: boolean;
+  };
   usedStats?: { player: Stat[]; ai: Stat[] };
   usedAbilities?: string[];
   abilityRound?: {
@@ -49,6 +64,9 @@ export interface Battle {
     reveal?: boolean;
     revealStats?: Stat[];
     evolutionStage?: number;
+    modifiers?: Partial<Stats>;
+    enemyModifiers?: Partial<Stats>;
+    swapEnemy?: boolean;
   };
   bossMemory?: Stat;
   chapter?: string;
@@ -172,12 +190,7 @@ export function createBattle(
 export function playRound(b: Battle, stat: Stat, s: Save): Battle {
   if (b.result || b.last || !availableStats(b, b.turn).includes(stat)) return b;
   const enemyId = b.ai[0];
-  if (
-    !b.opponentAbility &&
-    !ritaCurse(b) &&
-    !enemyHasPower(b, "ultron") &&
-    !enemyHasPower(b, "joker")
-  )
+  if (!b.opponentAbility)
     b = {
       ...b,
       opponentAbility: {
@@ -187,6 +200,13 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
           battleCharacters.find((c) => c.id === enemyId)!.baseStats,
           "Hard",
         )!,
+        ...uniqueEffect(
+          enemyId,
+          aiStat(
+            battleCharacters.find((c) => c.id === enemyId)!.baseStats,
+            "Hard",
+          )!,
+        ),
       },
     };
   const next = structuredClone(b);
@@ -286,17 +306,25 @@ export function opponentStats(b: Battle, base: Stats): Stats {
     values[b.bossMemory] = Math.min(100, values[b.bossMemory] + 10);
   if (enemyHasPower(b, "joker") && b.round % 2 === 1)
     [values.power, values.intelligence] = [values.intelligence, values.power];
-  if (b.opponentAbility?.round === b.round)
-    values[b.opponentAbility.stat] = Math.min(
-      100,
-      values[b.opponentAbility.stat] + 8,
-    );
+  if (b.abilityRound?.round === b.round) {
+    modifyStats(values, b.abilityRound.enemyModifiers);
+    if (b.abilityRound.swapEnemy)
+      [values.power, values.intelligence] = [values.intelligence, values.power];
+  }
+  const a = b.opponentAbility;
+  if (a?.round === b.round) {
+    if (a.shield) {
+      modifyStats(values, { durability: 12, combat: 6 });
+    } else if (a.modifiers) modifyStats(values, a.modifiers);
+    else values[a.stat] = a.value ?? Math.min(100, values[a.stat] + 8);
+  }
   return values;
 }
 function enemyHasPower(b: Battle, name: string) {
   return b.chapter === name || (b.last?.aiId || b.ai[0]) === `enemy-${name}`;
 }
 export function abilityName(id: string) {
+  if (uniquePowers[id]) return uniquePowers[id].name;
   return id === "rick-6"
     ? "Portal recalibration"
     : id === "dc-0"
@@ -348,10 +376,20 @@ export function abilityNotices(b: Battle): AbilityNotice[] {
   const enemyAbility = b.opponentAbility;
   if (enemyAbility?.round === b.round)
     notices.push({
-      title: `${battleCharacters.find((c) => c.id === enemyAbility.character)?.name || "Opponent"} uses Battle Focus!`,
-      description: `Opponent ${enemyAbility.stat} gains +8 this round (maximum 100). Their team's one fight boost is now used.`,
+      title: `${battleCharacters.find((c) => c.id === enemyAbility.character)?.name || "Opponent"} uses ${uniquePowers[enemyAbility.character]?.name || "Battle Focus"}!`,
+      description: `${enemyAbility.value !== undefined ? `Opponent ${enemyAbility.stat} is rerolled to ${enemyAbility.value} this round.` : uniquePowers[enemyAbility.character] ? uniqueDescription(enemyAbility.character, enemyAbility.stat) : `Opponent ${enemyAbility.stat} gains +8 this round (maximum 100).`} Their team's one fight boost is now used.`,
       side: "ai",
-      stats: [enemyAbility.stat],
+      stats: enemyAbility.shield
+        ? ["durability", "combat"]
+        : enemyAbility.swapEnemy
+          ? ["power", "intelligence"]
+          : ([
+              ...new Set([
+                enemyAbility.stat,
+                ...Object.keys(enemyAbility.modifiers || {}),
+                ...Object.keys(enemyAbility.enemyModifiers || {}),
+              ]),
+            ] as Stat[]),
     });
   if (a && a.round === b.round) {
     const name =
@@ -359,15 +397,29 @@ export function abilityNotices(b: Battle): AbilityNotice[] {
       "Your character";
     notices.push({
       title: `${name} uses ${abilityName(a.character)}!`,
-      description: a.reveal
-        ? `Opponent ${(a.revealStats || [a.stat]).join(", ")} revealed this round.`
-        : a.shield
-          ? `Your durability gains +${12 + (a.evolutionStage || 0) * 2} and combat gains +${6 + (a.evolutionStage || 0) * 2} this round (maximum 100).`
-          : a.value !== undefined
-            ? `Your ${a.stat} is rerolled to ${a.value} this round.`
-            : `Your ${a.stat} gains +${8 + (a.evolutionStage || 0) * 2} this round (maximum 100).`,
+      description:
+        uniquePowers[a.character] && a.modifiers
+          ? uniqueDescription(a.character, a.stat, a.evolutionStage)
+          : a.reveal
+            ? `Opponent ${(a.revealStats || [a.stat]).join(", ")} revealed this round.`
+            : a.shield
+              ? `Your durability gains +${12 + (a.evolutionStage || 0) * 2} and combat gains +${6 + (a.evolutionStage || 0) * 2} this round (maximum 100).`
+              : a.value !== undefined
+                ? `Your ${a.stat} is rerolled to ${a.value} this round.`
+                : `Your ${a.stat} gains +${8 + (a.evolutionStage || 0) * 2} this round (maximum 100).`,
       side: "player",
-      stats: a.shield ? ["durability", "combat"] : a.revealStats || [a.stat],
+      stats: a.shield
+        ? ["durability", "combat"]
+        : a.swapEnemy
+          ? ["power", "intelligence"]
+          : a.modifiers
+            ? ([
+                ...new Set([
+                  ...Object.keys(a.modifiers),
+                  ...Object.keys(a.enemyModifiers || {}),
+                ]),
+              ] as Stat[])
+            : a.revealStats || [a.stat],
     });
   }
   return notices;
@@ -415,6 +467,8 @@ export function activateAbility(
           ? { shield: true }
           : {}),
   };
+  if (uniquePowers[id] && id !== "rick-6" && id !== "rangers-6")
+    Object.assign(next.abilityRound!, uniqueEffect(id, stat, stage, rng));
   const notice = abilityNotices(next).find((n) => n.side === "player")!;
   next.log.unshift(`${notice.title}: ${notice.description}`);
   return next;
@@ -426,9 +480,16 @@ export function combatStats(b: Battle, id: string, base: Stats): Stats {
   if (cursed) {
     values[cursed] = Math.max(1, values[cursed] - 8);
   }
+  const enemyAbility = b.opponentAbility;
+  if (enemyAbility?.round === round) {
+    modifyStats(values, enemyAbility.enemyModifiers);
+    if (enemyAbility.swapEnemy)
+      [values.power, values.intelligence] = [values.intelligence, values.power];
+  }
   const a = b.abilityRound;
   if (a && a.round === round && a.character === id && !a.reveal) {
-    if (a.shield) {
+    if (a.modifiers) modifyStats(values, a.modifiers);
+    else if (a.shield) {
       values.durability = Math.min(
         100,
         values.durability + 12 + (a.evolutionStage || 0) * 2,

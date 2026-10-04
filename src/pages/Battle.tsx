@@ -8,6 +8,7 @@ import { themes } from "../data/themes";
 import { Card } from "../components/Card";
 import { BattleEffects } from "../components/BattleEffects";
 import { evolutionFor } from "../game/evolution";
+import { uniquePowers, uniqueDescription } from "../game/uniquePowers";
 import {
   createBattle,
   playRound,
@@ -381,28 +382,39 @@ export function BattlePage({
             <div className="panel">
               <h3>{abilityName(pc.id)}</h3>
               <p>
-                {pc.id === "rick-6"
-                  ? `Reroll one stat to ${70 + evolutionFor(pc, s).stage * 5}–100. It may become lower.`
-                  : pc.id === "dc-0"
-                    ? `Reveal ${1 + evolutionFor(pc, s).stage} enemy stats before attacking.`
-                    : pc.id === "rangers-6"
-                      ? `+${12 + evolutionFor(pc, s).stage * 2} durability and +${6 + evolutionFor(pc, s).stage * 2} combat this round.`
-                      : `+${8 + evolutionFor(pc, s).stage * 2} to one stat this round.`}{" "}
+                {uniquePowers[pc.id]
+                  ? uniqueDescription(
+                      pc.id,
+                      abilityStat,
+                      evolutionFor(pc, s).stage,
+                    )
+                  : pc.id === "rick-6"
+                    ? `Reroll one stat to ${70 + evolutionFor(pc, s).stage * 5}–100. It may become lower.`
+                    : pc.id === "dc-0"
+                      ? `Reveal ${1 + evolutionFor(pc, s).stage} enemy stats before attacking.`
+                      : pc.id === "rangers-6"
+                        ? `+${12 + evolutionFor(pc, s).stage * 2} durability and +${6 + evolutionFor(pc, s).stage * 2} combat this round.`
+                        : `+${8 + evolutionFor(pc, s).stage * 2} to one stat this round.`}{" "}
                 One ability use for your whole team per fight.
               </p>
-              <label>
-                Ability stat
-                <select
-                  value={abilityStat}
-                  onChange={(e) =>
-                    setAbilityStat(e.target.value as (typeof statKeys)[number])
-                  }
-                >
-                  {statKeys.map((k) => (
-                    <option key={k}>{k}</option>
-                  ))}
-                </select>
-              </label>
+              {(!uniquePowers[pc.id] ||
+                ["rick-6", "enemy-rita", "enemy-ultron"].includes(pc.id)) && (
+                <label>
+                  Ability stat
+                  <select
+                    value={abilityStat}
+                    onChange={(e) =>
+                      setAbilityStat(
+                        e.target.value as (typeof statKeys)[number],
+                      )
+                    }
+                  >
+                    {statKeys.map((k) => (
+                      <option key={k}>{k}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <button
                 className="secondary"
                 disabled={

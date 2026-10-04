@@ -20,6 +20,7 @@ import { statKeys, type Save } from "../types";
 import { evolutionFor } from "../game/evolution";
 import { villainChapter } from "../game/villains";
 import { chapters } from "../game/adventures";
+import { uniquePowers, uniqueDescription } from "../game/uniquePowers";
 export function CharacterDetail({
   id,
   save: s,
@@ -77,6 +78,19 @@ export function CharacterDetail({
         </span>
         <h1>{c.name}</h1>
         <p className="muted">{c.description}</p>
+        {uniquePowers[c.id] && (
+          <div className="panel">
+            <h2>Fight ability · {uniquePowers[c.id].name}</h2>
+            <p>
+              {uniqueDescription(c.id, "special", evolutionFor(c, s).stage)}
+            </p>
+            <p>
+              One activation for your whole team per fight. Opponents use this
+              power automatically; your card uses the Activate ability button.
+              For a targeted power, choose the ability stat in battle.
+            </p>
+          </div>
+        )}
         <div className="panel evolution-panel">
           <h2>Evolution · {evolutionFor(c, s).name}</h2>
           <p>

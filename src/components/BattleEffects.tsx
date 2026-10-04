@@ -1,4 +1,5 @@
 import { abilityNotices, type Battle } from "../game/battle";
+import { uniquePowers } from "../game/uniquePowers";
 
 export function BattleEffects({ battle: b }: { battle: Battle }) {
   const attack = b.last?.stat;
@@ -36,13 +37,14 @@ export function BattleEffects({ battle: b }: { battle: Battle }) {
         >
           {a.shield ? "⬡" : a.value !== undefined ? "◎" : a.reveal ? "⌖" : "✦"}
           <span>
-            {a.shield
-              ? "SHIELD!"
-              : a.value !== undefined
-                ? "PORTAL!"
-                : a.reveal
-                  ? "SCANNED!"
-                  : "BOOST!"}
+            {uniquePowers[a.character]?.name ||
+              (a.shield
+                ? "SHIELD!"
+                : a.value !== undefined
+                  ? "PORTAL!"
+                  : a.reveal
+                    ? "SCANNED!"
+                    : "BOOST!")}
           </span>
         </div>
       )}
@@ -50,7 +52,18 @@ export function BattleEffects({ battle: b }: { battle: Battle }) {
         (n) => n.side === "ai" && !n.title.includes("Moon Curse"),
       ) && (
         <div key={`enemy-${round}`} className="ability-vfx vfx-enemy">
-          ✹<span>POWER UP!</span>
+          {b.opponentAbility?.round === round && b.opponentAbility.shield
+            ? "⬡"
+            : b.opponentAbility?.round === round &&
+                b.opponentAbility.value !== undefined
+              ? "◎"
+              : "✹"}
+          <span>
+            {b.opponentAbility?.round === round
+              ? uniquePowers[b.opponentAbility.character]?.name ||
+                "BATTLE FOCUS!"
+              : "POWER UP!"}
+          </span>
         </div>
       )}
     </div>

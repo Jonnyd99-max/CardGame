@@ -100,7 +100,9 @@ it("casts Rita's curse outside her boss chapter and keeps it on the resolved rou
   expect(combatStats(b, "rangers-0", base).strength).toBe(base.strength - 8);
   const fought = playRound(b, "strength", s);
   expect(fought.last?.a).toBe(base.strength - 8);
-  expect(fought.log[0]).toContain("Rita casts Moon Curse");
+  expect(fought.log.some((l) => l.includes("Rita casts Moon Curse"))).toBe(
+    true,
+  );
   expect(fought.ai[0]).toBe("enemy-goldar");
   expect(ritaCurse(fought)).toBe("strength");
   expect(ritaCurse({ ...fought, last: undefined })).toBeUndefined();
@@ -132,7 +134,9 @@ it("announces active abilities and preserves Ultron's previous-stat announcement
     bossMemory: "speed" as const,
   };
   const fought = playRound(ultron, "combat", s);
-  expect(abilityNotices(fought)).toEqual(abilityNotices(ultron));
+  expect(abilityNotices(fought)).toEqual(
+    expect.arrayContaining(abilityNotices(ultron)),
+  );
   expect(
     fought.log.some(
       (l) => l.includes("Adaptive Armour") && l.includes("speed"),
