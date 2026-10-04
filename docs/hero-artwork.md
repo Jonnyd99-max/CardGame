@@ -1,8 +1,8 @@
 # Custom hero artwork
 
-The creator combines eight backgrounds and eight headless bodies generated as image atlases. Its eight helmet choices reuse the existing front-facing Ranger evolution artwork, cropped and masked in CSS; the new head atlas was rejected by image generation and was not retried.
+The creator combines eight backgrounds and eight headless bodies generated as image atlases. The first version reused Ranger portrait crops after the initial head generation failed. The replacement now uses eight original transparent heads, documented in hero-heads.md.
 
-All parts are displayed in a fixed front-facing pose. Head positioning and silhouette clipping are implemented in HeroArtwork.tsx and comic.css. Existing character cards retain their normal artwork.
+All parts are displayed in a fixed front-facing pose. Head positioning is implemented in HeroArtwork.tsx and comic.css. Existing character cards retain their normal artwork.
 
 ## heads
 A transparent sprite atlas EXACTLY 4 columns and 2 rows of 8 equal square cells. Each cell one original comic superhero HEAD with short straight neck only, no torso, no shoulders, no text, no gutters. Front-facing perfectly centered straight pose, neck joins centered at bottom edge of each cell. Same scale and eye height in every cell, no rotations. Bold ink vibrant comic artwork, clean crisp transparent surroundings. In reading order: red futuristic helmet with silver visor; blue angular helmet; gold knight helmet; green masked human face; purple alien humanoid face; black robotic helmet with cyan eyes; unmasked dark-skinned woman with short hair; unmasked light-skinned man with dark hair. Original designs, no existing characters. Game component sheet 2048x1024.

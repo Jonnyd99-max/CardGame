@@ -8,15 +8,16 @@ import {
   transferPoint,
 } from "../game/customHeroes";
 import { franchises } from "../data/franchises";
+import { assetUrl } from "../game/assetUrl";
 const heads = [
-  "Red Ranger helmet",
-  "Blue Ranger helmet",
-  "Pink Ranger helmet",
-  "Black Ranger helmet",
-  "Yellow Ranger helmet",
-  "White Ranger helmet",
-  "Green Ranger helmet",
-  "Armoured red helmet",
+  "Crimson visor · man",
+  "Blue helmet · woman",
+  "Short-haired man",
+  "Curly-haired woman",
+  "Golden helmet · man",
+  "Purple helmet · woman",
+  "Bearded man",
+  "Red-haired woman",
 ];
 const bodies = [
   "Crimson armour",
@@ -176,6 +177,32 @@ export function HeroCreator({
               All creator parts use the same front-facing pose and neck
               position.
             </p>
+            <div
+              className="hero-head-choices"
+              role="group"
+              aria-label="Head choices"
+            >
+              {heads.map((head, index) => (
+                <button
+                  key={head}
+                  type="button"
+                  aria-label={`Choose ${head}`}
+                  aria-pressed={look.head === index}
+                  onClick={() => setLook({ ...look, head: index })}
+                >
+                  <span
+                    className="hero-head-thumb"
+                    aria-hidden="true"
+                    style={{
+                      backgroundImage: `url("${assetUrl("/artwork/hero-heads.png")}")`,
+                      backgroundSize: "400% 200%",
+                      backgroundPosition: `${((index % 4) / 3) * 100}% ${Math.floor(index / 4) * 100}%`,
+                    }}
+                  />
+                  <span>{head}</span>
+                </button>
+              ))}
+            </div>
             {[
               ["background", backgrounds],
               ["head", heads],

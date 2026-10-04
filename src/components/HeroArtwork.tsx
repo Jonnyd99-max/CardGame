@@ -20,15 +20,7 @@ export function HeroArtwork({
         style={style("backgrounds", look.background)}
       />
       <div className="hero-body" style={style("bodies", look.body)} />
-      <div className="hero-head">
-        <div
-          style={{
-            backgroundImage: `url("${assetUrl("/artwork/evolution-rangers.png")}")`,
-            backgroundSize: "400% 400%",
-            backgroundPosition: `${((look.head % 4) / 3) * 100}% ${(Math.floor(look.head / 4) / 3) * 100}%`,
-          }}
-        />
-      </div>
+      <div className="hero-head" style={style("heads", look.head)} />
     </div>
   );
 }
