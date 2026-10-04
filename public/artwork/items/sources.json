@@ -1,0 +1,115 @@
+{
+  "leftovers": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/leftovers.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "wise-glasses": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/wise-glasses.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "muscle-band": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/muscle-band.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "charcoal": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/charcoal.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "mystic-water": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/mystic-water.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "miracle-seed": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/miracle-seed.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "quick-claw": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/quick-claw.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "focus-sash": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/focus-sash.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "venusaurite": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/venusaurite.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "charizardite-x": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/charizardite-x.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "charizardite-y": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/charizardite-y.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "blastoisinite": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/blastoisinite.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "beedrillite": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/beedrillite.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "pidgeotite": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/pidgeotite.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "raichunite-x": {
+    "description": "Custom illustrated Mega Stone icon in the game's gem style; colors match its Pokémon."
+  },
+  "raichunite-y": {
+    "description": "Custom illustrated Mega Stone icon in the game's gem style; colors match its Pokémon."
+  },
+  "clefablite": {
+    "description": "Custom illustrated Mega Stone icon in the game's gem style; colors match its Pokémon."
+  },
+  "victreebelite": {
+    "description": "Custom illustrated Mega Stone icon in the game's gem style; colors match its Pokémon."
+  },
+  "starminite": {
+    "description": "Custom illustrated Mega Stone icon in the game's gem style; colors match its Pokémon."
+  },
+  "dragoninite": {
+    "description": "Custom illustrated Mega Stone icon in the game's gem style; colors match its Pokémon."
+  },
+  "alakazite": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/alakazite.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "slowbronite": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/slowbronite.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "gengarite": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/gengarite.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "kangaskhanite": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/kangaskhanite.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "pinsirite": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/pinsirite.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "gyaradosite": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/gyaradosite.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "aerodactylite": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/aerodactylite.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "mewtwonite-x": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/mewtwonite-x.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "mewtwonite-y": {
+    "url": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/mewtwonite-y.png",
+    "description": "Pokémon item sprite from PokeAPI's sprite collection."
+  },
+  "arcaninite": {
+    "description": "Custom illustrated Mega Stone icon in the game's gem style; colors match its Pokémon."
+  }
+}

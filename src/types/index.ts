@@ -41,6 +41,13 @@ export interface Character {
   avatar: number;
 }
 export interface Item {
+  category?: "held-item" | "mega-stone" | "trainer";
+  grantedAbility?: {
+    name: string;
+    description: string;
+    modifiers: Partial<Stats>;
+  };
+  megaArtwork?: string;
   id: string;
   name: string;
   rarity: Rarity;
@@ -72,6 +79,11 @@ export interface Deck {
   rule: DeckRule;
 }
 export interface Save {
+  pokemonAcquisitionVersion?: 1;
+  pokemonSeen?: string[];
+  pokemonShinies?: string[];
+  pokemonMegaSeen?: string[];
+  pokemonProgressionVersion?: 1;
   customHero?: {
     name: string;
     franchise: string;

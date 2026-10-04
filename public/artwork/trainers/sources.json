@@ -1,0 +1,38 @@
+{
+  "oak": {
+    "url": "https://play.pokemonshowdown.com/sprites/trainers/oak-gen3.png",
+    "description": "Generation III trainer sprite, hosted by Pokémon Showdown. Pokémon artwork belongs to its respective owners."
+  },
+  "blaine": {
+    "url": "https://play.pokemonshowdown.com/sprites/trainers/blaine-gen3.png",
+    "description": "Generation III trainer sprite, hosted by Pokémon Showdown. Pokémon artwork belongs to its respective owners."
+  },
+  "brock": {
+    "url": "https://play.pokemonshowdown.com/sprites/trainers/brock-gen3.png",
+    "description": "Generation III trainer sprite, hosted by Pokémon Showdown. Pokémon artwork belongs to its respective owners."
+  },
+  "erika": {
+    "url": "https://play.pokemonshowdown.com/sprites/trainers/erika-gen3.png",
+    "description": "Generation III trainer sprite, hosted by Pokémon Showdown. Pokémon artwork belongs to its respective owners."
+  },
+  "giovanni": {
+    "url": "https://play.pokemonshowdown.com/sprites/trainers/giovanni-gen3.png",
+    "description": "Generation III trainer sprite, hosted by Pokémon Showdown. Pokémon artwork belongs to its respective owners."
+  },
+  "sabrina": {
+    "url": "https://play.pokemonshowdown.com/sprites/trainers/sabrina-gen3.png",
+    "description": "Generation III trainer sprite, hosted by Pokémon Showdown. Pokémon artwork belongs to its respective owners."
+  },
+  "surge": {
+    "url": "https://play.pokemonshowdown.com/sprites/trainers/ltsurge-gen3.png",
+    "description": "Generation III trainer sprite, hosted by Pokémon Showdown. Pokémon artwork belongs to its respective owners."
+  },
+  "koga": {
+    "url": "https://play.pokemonshowdown.com/sprites/trainers/koga-gen3.png",
+    "description": "Generation III trainer sprite, hosted by Pokémon Showdown. Pokémon artwork belongs to its respective owners."
+  },
+  "misty": {
+    "url": "https://play.pokemonshowdown.com/sprites/trainers/misty-gen3.png",
+    "description": "Generation III trainer sprite, hosted by Pokémon Showdown. Pokémon artwork belongs to its respective owners."
+  }
+}

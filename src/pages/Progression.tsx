@@ -1,4 +1,6 @@
 import { Gift, Zap, Check, Trophy } from "lucide-react";
+import { useState } from "react";
+import { heldItemTypes } from "../data/pokemonItems";
 import { characters, getCharacters } from "../data/characters";
 import { progression } from "../data/unlocks";
 import { items, playerLevel, periodKeys, grantXP } from "../game/progression";
@@ -7,6 +9,8 @@ import { Progress } from "../components/UI";
 import { Card } from "../components/Card";
 import { ItemArtwork } from "../components/ItemArtwork";
 import type { Save } from "../types";
+import { isPokemon } from "../game/gameMode";
+import { battleStatKeys, statLabel } from "../game/statPresentation";
 export function Upgrades({
   save,
   detail,
@@ -51,13 +55,14 @@ export function Equipment({
   save: Save;
   update: (fn: (s: Save) => void) => void;
 }) {
+  const [category, setCategory] = useState("");
   return (
     <>
       <div className="page-heading">
         <div>
           <span className="eyebrow">GEAR FOR THE EXTRAORDINARY</span>
           <h1>
-            Your <em>arsenal.</em>
+            Your <em>{isPokemon ? "Pokémon gear." : "arsenal."}</em>
           </h1>
           <p>
             Earn your edge. Buy with battle coins, then equip from a character’s
@@ -65,60 +70,100 @@ export function Equipment({
           </p>
         </div>
       </div>
+      {isPokemon && (
+        <div
+          className="button-row equipment-categories"
+          role="group"
+          aria-label="Equipment category"
+        >
+          {[
+            ["", "All"],
+            ["held-item", "Held items"],
+            ["mega-stone", "Mega Stones"],
+            ["trainer", "Trainers"],
+          ].map(([value, label]) => (
+            <button
+              className={`secondary ${category === value ? "selected" : ""}`}
+              aria-pressed={category === value}
+              key={value}
+              onClick={() => setCategory(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       <div className="equipment-grid">
-        {items.map((i) => {
-          const owned = s.items[i.id] || 0,
-            canBuy = s.coins >= i.cost && playerLevel(s.xp) >= i.unlockLevel;
-          return (
-            <div className="panel equipment-card" key={i.id}>
-              <div className="equipment-art">
-                <ItemArtwork item={i} />
+        {items
+          .filter((i) => !category || i.category === category)
+          .map((i) => {
+            const owned = s.items[i.id] || 0,
+              canBuy = s.coins >= i.cost && playerLevel(s.xp) >= i.unlockLevel;
+            return (
+              <div className="panel equipment-card" key={i.id}>
+                <div className="equipment-art">
+                  <ItemArtwork item={i} />
+                </div>
+                <span className="eyebrow">
+                  {i.rarity} ·{" "}
+                  {i.category ? i.category.replace("-", " ") : i.slot}
+                </span>
+                <h2>{i.name}</h2>
+                <p>{i.description}</p>
+                <div className="modifiers">
+                  {Object.entries(i.modifiers).filter(([k, v]) => v && (!isPokemon || battleStatKeys.includes(k as typeof battleStatKeys[number]))).map(([k, v]) => (
+                    <span key={k}>
+                      {v > 0 ? "+" : ""}{v * (i.category === "mega-stone" ? 1 : Math.max(1, owned))} {statLabel(k)}
+                    </span>
+                  ))}
+                  {i.grantedAbility && (
+                    <>
+                      <b>{i.grantedAbility.name}</b>
+                      {Object.entries(i.grantedAbility.modifiers).map(
+                        ([k, v]) => (
+                          <span key={k}>
+                            +{v! * Math.max(1, owned)} {statLabel(k)}
+                          </span>
+                        ),
+                      )}
+                    </>
+                  )}
+                </div>
+                <small>
+                  Unlock level {i.unlockLevel} ·{" "}
+                  {heldItemTypes[i.id]
+                    ? `For ${heldItemTypes[i.id]} Pokémon (either type)`
+                    : i.characters.length
+                      ? `For ${i.characters.map((id) => characters.find((c) => c.id === id)?.name).join(", ")}`
+                      : i.franchises.length
+                        ? "Mighty Morphin Rangers"
+                        : "Universal compatibility"}
+                </small>
+                <button
+                  className="primary full"
+                  disabled={
+                    owned
+                      ? owned >= 3 || s.coins < i.cost || s.materials < 2
+                      : !canBuy
+                  }
+                  onClick={() =>
+                    update((x) => {
+                      x.coins -= i.cost;
+                      if (owned) x.materials -= 2;
+                      x.items[i.id] = owned + 1;
+                    })
+                  }
+                >
+                  {owned
+                    ? owned >= 3
+                      ? "Fully enhanced"
+                      : `Enhance to ${owned + 1} · ${i.cost} coins + 2 materials`
+                    : `Acquire · ${i.cost} coins`}
+                </button>
+                {owned > 0 && <small>Owned · enhancement {owned}/3</small>}
               </div>
-              <span className="eyebrow">
-                {i.rarity} · {i.slot}
-              </span>
-              <h2>{i.name}</h2>
-              <p>{i.description}</p>
-              <div className="modifiers">
-                {Object.entries(i.modifiers).map(([k, v]) => (
-                  <span key={k}>
-                    +{v * Math.max(1, owned)} {k}
-                  </span>
-                ))}
-              </div>
-              <small>
-                Unlock level {i.unlockLevel} ·{" "}
-                {i.characters.length
-                  ? `For ${i.characters.map((id) => characters.find((c) => c.id === id)?.name).join(", ")}`
-                  : i.franchises.length
-                    ? "Mighty Morphin Rangers"
-                    : "Universal compatibility"}
-              </small>
-              <button
-                className="primary full"
-                disabled={
-                  owned
-                    ? owned >= 3 || s.coins < i.cost || s.materials < 2
-                    : !canBuy
-                }
-                onClick={() =>
-                  update((x) => {
-                    x.coins -= i.cost;
-                    if (owned) x.materials -= 2;
-                    x.items[i.id] = owned + 1;
-                  })
-                }
-              >
-                {owned
-                  ? owned >= 3
-                    ? "Fully enhanced"
-                    : `Enhance to ${owned + 1} · ${i.cost} coins + 2 materials`
-                  : `Acquire · ${i.cost} coins`}
-              </button>
-              {owned > 0 && <small>Owned · enhancement {owned}/3</small>}
-            </div>
-          );
-        })}
+            );
+          })}
       </div>
     </>
   );

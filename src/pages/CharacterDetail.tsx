@@ -1,10 +1,14 @@
 import { Star, ArrowRight, Lock } from "lucide-react";
+import { isPokemon } from "../game/gameMode";
+import { battleStatKeys, statLabel, statBonusLabel } from "../game/statPresentation";
+import { nextPokemonEvolutions } from "../data/pokemonEvolution";
+import { pokemonUnlockText } from "../game/pokemonProgression";
 import { getCharacter } from "../data/characters";
 import { progression } from "../data/unlocks";
 import { franchises } from "../data/franchises";
 import { groups } from "../data/groups";
 import { abilities } from "../data/abilities";
-import { Card } from "../components/Card";
+import { Card, Artwork } from "../components/Card";
 import { Progress } from "../components/UI";
 import { ItemArtwork } from "../components/ItemArtwork";
 import {
@@ -15,6 +19,7 @@ import {
   playerLevel,
   unlockLevelFor,
   toggleEquipment,
+  upgradeCharacter,
 } from "../game/progression";
 import { statKeys, type Save } from "../types";
 import { evolutionFor } from "../game/evolution";
@@ -51,14 +56,18 @@ export function CharacterDetail({
     )
       return;
     update((x) => {
-      x.coins -= cost;
-      x.materials--;
-      x.cards[id].xp -= progression.xpPerCharacterLevel;
-      x.cards[id].level++;
-      x.upgrades++;
+      upgradeCharacter(x, id);
     });
     notify(`${c.name} reached level ${p.level + 1}`);
-    if (p.level + 1 === 5 || p.level + 1 === 10)
+    if (isPokemon) {
+      const evolved = nextPokemonEvolutions(id).filter(
+        (e) => e.level === p.level + 1 && !s.owned.includes(e.id),
+      );
+      if (evolved.length)
+        notify(
+          `${evolved.map((e) => getCharacter(e.id)!.name).join(", ")} unlocked! Find your new Pokémon in the collection.`,
+        );
+    } else if (p.level + 1 === 5 || p.level + 1 === 10)
       notify(
         `${c.name} evolved! A new form and stronger fight ability are unlocked.`,
       );
@@ -68,7 +77,9 @@ export function CharacterDetail({
       <div className="detail-preview">
         <Card character={c} save={s} locked={!owned} />
         <div className="tip">
-          Comic edition · Collect your favourite heroes.
+          {isPokemon
+            ? "Kanto edition · Train your Pokémon to unlock its evolutions."
+            : "Comic edition · Collect your favourite heroes."}
         </div>
       </div>
       <div>
@@ -93,27 +104,68 @@ export function CharacterDetail({
         )}
         <div className="panel evolution-panel">
           <h2>Evolution · {evolutionFor(c, s).name}</h2>
-          <p>
-            Card level 5 unlocks evolution I. Level 10 unlocks evolution II.
-            Train and upgrade this card to evolve automatically.
-          </p>
-          <p>
-            Each evolution adds +2 to focus and shield bonuses. Rick’s reroll
-            minimum rises by 5; Batman reveals one extra stat. Your team still
-            gets only one ability per fight.
-          </p>
-          <p>
-            {evolutionFor(c, s).nextLevel
-              ? `Next form at card level ${evolutionFor(c, s).nextLevel}.`
-              : "Final form unlocked!"}
-          </p>
+          {isPokemon ? (
+            <>
+              <p>
+                Upgrade this Pokémon using Pokémon XP, coins and materials.
+                Evolved cards are added to your collection; your original card
+                stays yours.
+              </p>
+              {nextPokemonEvolutions(id).length ? (
+                <div className="pokemon-evolution-path">
+                  {nextPokemonEvolutions(id).map((e) => (
+                    <div key={e.id}>
+                      <Artwork character={getCharacter(e.id)!} />
+                      <b>{getCharacter(e.id)!.name}</b>
+                      <span>
+                        {s.owned.includes(e.id)
+                          ? "Collected"
+                          : `Upgrade ${c.name} to level ${e.level}`}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>
+                  This Pokémon has no further evolution in the original 151.
+                  Compatible Mega Stones can temporarily boost eligible Pokémon
+                  while equipped.
+                </p>
+              )}
+              <p>
+                First evolutions unlock at Pokémon level 5; final evolutions in
+                three-stage families unlock by training the middle Pokémon to
+                level 15. Each new card starts at its evolution level.
+              </p>
+            </>
+          ) : (
+            <>
+              <p>
+                Card level 5 unlocks evolution I. Level 10 unlocks evolution II.
+                Train and upgrade this card to evolve automatically.
+              </p>
+              <p>
+                Each evolution adds +2 to focus and shield bonuses. Rick’s
+                reroll minimum rises by 5; Batman reveals one extra stat. Your
+                team still gets only one ability per fight.
+              </p>
+              <p>
+                {evolutionFor(c, s).nextLevel
+                  ? `Next form at card level ${evolutionFor(c, s).nextLevel}.`
+                  : "Final form unlocked!"}
+              </p>
+            </>
+          )}
         </div>
         {!owned ? (
           <div className="panel">
             <Lock />{" "}
-            {villainChapter(c.id)
-              ? `Win “${chapters.find((ch) => ch.id === villainChapter(c.id))?.name}” to collect this villain. Replays count.`
-              : `Unlocks at player level ${unlockLevelFor(c, s)}. Current level: ${playerLevel(s.xp)}.`}
+            {isPokemon && pokemonUnlockText(id, s)
+              ? pokemonUnlockText(id, s)
+              : !isPokemon && villainChapter(c.id)
+                ? `Win “${chapters.find((ch) => ch.id === villainChapter(c.id))?.name}” to collect this villain. Replays count.`
+                : isPokemon ? unlockLevelFor(c, s) <= playerLevel(s.xp) ? "Available in packs. Open a Pokémon pack to collect this card." : `Available in packs from player level ${unlockLevelFor(c, s)}. Current level: ${playerLevel(s.xp)}.`
+                : `Unlocks at player level ${unlockLevelFor(c, s)}. Current level: ${playerLevel(s.xp)}.`}
             {s.cards[id] && (
               <p>
                 Your earlier training and upgrades are saved for when this card
@@ -153,9 +205,9 @@ export function CharacterDetail({
         <div className="panel">
           <h2>Battle attributes</h2>
           <div className="detail-stats">
-            {statKeys.map((k) => (
+            {battleStatKeys.map((k) => (
               <div key={k}>
-                <span>{k === "special" ? "Special ability" : k}</span>
+                <span>{statLabel(k)}</span>
                 <Progress value={stats[k]} />
                 <b>{stats[k]}</b>
                 {owned && p.level < c.maxLevel && <small>→ {next[k]}</small>}
@@ -185,7 +237,7 @@ export function CharacterDetail({
                 <ArrowRight size={16} />
               </button>
               <div className="boost-grid">
-                {statKeys.map((k) => (
+                {battleStatKeys.map((k) => (
                   <button
                     className="secondary"
                     key={k}
@@ -204,16 +256,21 @@ export function CharacterDetail({
                       })
                     }
                   >
-                    +1 {k} <small>100 coins · 1 material · max +5</small>
+                    +1 {statLabel(k)} <small>100 coins · 1 material · max +5</small>
                   </button>
                 ))}
               </div>
             </div>
             <div className="panel">
-              <h2>Weapons & equipment</h2>
+              <h2>
+                {isPokemon
+                  ? "Held items, Mega Stones & trainers"
+                  : "Weapons & equipment"}
+              </h2>
               <p>
-                One weapon and one equipment slot. Equip, replace or remove
-                anytime.
+                {isPokemon
+                  ? "One held item or Mega Stone, plus one trainer. Trainer abilities apply while assigned; removing a trainer removes the ability."
+                  : "One weapon and one equipment slot. Equip, replace or remove anytime."}
               </p>
               <div className="item-list">
                 {items
@@ -229,11 +286,23 @@ export function CharacterDetail({
                           <b>{i.name}</b>
                           <small>
                             {Object.entries(i.modifiers)
+                              .filter(([k, v]) => v && (!isPokemon || battleStatKeys.includes(k as typeof battleStatKeys[number])))
                               .map(
-                                ([k, v]) => `+${v * (s.items[i.id] || 1)} ${k}`,
+                                ([k, v]) => statBonusLabel(k, v * (i.category === "mega-stone" ? 1 : s.items[i.id] || 1)),
                               )
                               .join(" · ")}
                           </small>
+                          {i.grantedAbility && (
+                            <small>
+                              Grants {i.grantedAbility.name}:{" "}
+                              {Object.entries(i.grantedAbility.modifiers)
+                                .map(
+                                  ([k, v]) =>
+                                    statBonusLabel(k, v! * (s.items[i.id] || 1)),
+                                )
+                                .join(" · ")}
+                            </small>
+                          )}
                         </section>
                         <button
                           className="secondary"
@@ -256,7 +325,30 @@ export function CharacterDetail({
               </div>
             </div>
             <div className="panel">
-              <h2>Abilities</h2>
+              <h2>
+                {isPokemon ? "Techniques & trainer abilities" : "Abilities"}
+              </h2>
+              {isPokemon &&
+                items
+                  .filter((i) => i.grantedAbility && p.equipment.includes(i.id))
+                  .map((i) => (
+                    <div className="item-row" key={i.id}>
+                      <section>
+                        <b>
+                          {i.grantedAbility!.name} · {i.name}
+                        </b>
+                        <p>
+                          {i.grantedAbility!.description} Active while assigned.{" "}
+                          {Object.entries(i.grantedAbility!.modifiers)
+                            .map(
+                              ([k, v]) => statBonusLabel(k, v! * (s.items[i.id] || 1)),
+                            )
+                            .join(" · ")}
+                        </p>
+                      </section>
+                      <span className="pill">Active</span>
+                    </div>
+                  ))}
               {abilities
                 .filter((a) => c.abilities.includes(a.id))
                 .map((a) => (
@@ -266,7 +358,7 @@ export function CharacterDetail({
                       <p>
                         {a.description}{" "}
                         {Object.entries(a.modifiers)
-                          .map(([k, v]) => `+${v} ${k}`)
+                          .map(([k, v]) => statBonusLabel(k, v))
                           .join(" · ")}
                       </p>
                     </section>
@@ -303,6 +395,7 @@ export function CharacterDetail({
                     {style}
                   </button>
                 ))}
+                {isPokemon && <button className={`secondary ${p.style === "shiny" ? "selected" : ""}`} disabled={!s.pokemonShinies?.includes(id)} onClick={() => update(x => { x.cards[id].style = "shiny"; })}>{s.pokemonShinies?.includes(id) ? "Shiny" : "Shiny · find in packs"}</button>}
               </div>
               <p>
                 {p.wins} victories with this character · {s.history.length}{" "}

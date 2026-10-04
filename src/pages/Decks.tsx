@@ -1,3 +1,12 @@
+import { isPokemon } from "../game/gameMode";
+const ruleLabel = (rule: string) =>
+  isPokemon
+    ? {
+        "Mixed Universe": "Mixed types",
+        "Single Franchise": "Single type",
+        "Single Group": "Single type group",
+      }[rule] || rule
+    : rule;
 import { useState } from "react";
 import { Plus, Trash2, Check, Layers } from "lucide-react";
 import { getCharacter } from "../data/characters";
@@ -29,7 +38,7 @@ export function Decks({
           onClick={() =>
             setEdit({
               id: crypto.randomUUID(),
-              name: "New dimension",
+              name: isPokemon ? "New Kanto team" : "New dimension",
               rule: "Mixed Universe",
               cards: [],
             })
@@ -42,7 +51,7 @@ export function Decks({
         {s.decks.map((d) => (
           <div className="panel" key={d.id}>
             <Layers className="accent" size={36} />
-            <span className="eyebrow">{d.rule}</span>
+            <span className="eyebrow">{ruleLabel(d.rule)}</span>
             <h2>{d.name}</h2>
             <p>{d.cards.length} characters</p>
             <div className="deck-names">
@@ -106,7 +115,9 @@ export function Decks({
             >
               {["Mixed Universe", "Single Franchise", "Single Group"].map(
                 (r) => (
-                  <option key={r}>{r}</option>
+                  <option key={r} value={r}>
+                    {ruleLabel(r)}
+                  </option>
                 ),
               )}
             </select>

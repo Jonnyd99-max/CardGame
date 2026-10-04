@@ -1,3 +1,4 @@
+import { isPokemon } from "../game/gameMode";
 import { useState, useRef, useEffect } from "react";
 import { Download, Upload } from "lucide-react";
 import { getCharacters } from "../data/characters";
@@ -37,7 +38,7 @@ export function Settings({
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = "jd-multiverse-save.json";
+    a.download = isPokemon ? "jd-pokemon-save.json" : "jd-multiverse-save.json";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -45,11 +46,19 @@ export function Settings({
     <>
       <div className="page-heading">
         <div>
-          <span className="eyebrow">MAKE THIS MULTIVERSE YOURS</span>
+          <span className="eyebrow">
+            {isPokemon
+              ? "YOUR TRAINER PREFERENCES"
+              : "MAKE THIS MULTIVERSE YOURS"}
+          </span>
           <h1>
             Your <em>preferences.</em>
           </h1>
-          <p>A universe that changes with you.</p>
+          <p>
+            {isPokemon
+              ? "Your Kanto adventure, your way."
+              : "A universe that changes with you."}
+          </p>
         </div>
       </div>
       <div className="settings-grid">
@@ -71,7 +80,9 @@ export function Settings({
             />
           </label>
           <label>
-            Favourite universe / active theme
+            {isPokemon
+              ? "Favourite type / active theme"
+              : "Favourite universe / active theme"}
             <select
               value={s.franchise}
               onChange={(e) =>
@@ -88,7 +99,7 @@ export function Settings({
             </select>
           </label>
           <label>
-            Favourite group
+            {isPokemon ? "Type group" : "Favourite group"}
             <select
               value={s.group}
               onChange={(e) =>
@@ -107,7 +118,7 @@ export function Settings({
             </select>
           </label>
           <label>
-            Favourite character
+            {isPokemon ? "Favourite Pokémon" : "Favourite character"}
             <select
               value={s.favourite}
               onChange={(e) =>

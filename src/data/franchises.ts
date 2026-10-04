@@ -1,4 +1,6 @@
-export const franchises = [
+import { isPokemon } from "../game/gameMode";
+import { pokemonTypes } from "./pokemon";
+const multiverseFranchises = [
   {
     id: "rangers",
     name: "Mighty Morphin",
@@ -28,3 +30,5 @@ export const franchises = [
     symbol: "◎",
   },
 ];
+
+export const franchises = isPokemon ? pokemonTypes : multiverseFranchises;

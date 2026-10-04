@@ -1,3 +1,4 @@
+import { pokemonTypes } from "./pokemon";
 export const themes: Record<
   string,
   { accent: string; glow: string; arena: string }
@@ -11,3 +12,10 @@ export const themes: Record<
   dc: { accent: "#345aaa", glow: "#bcd8f0", arena: "Heroic skyline" },
   rick: { accent: "#168653", glow: "#dbf49c", arena: "Portal dimension" },
 };
+
+for (const type of pokemonTypes)
+  themes[type.id] = {
+    accent: type.color,
+    glow: type.color,
+    arena: `${type.name} · Kanto battle arena`,
+  };

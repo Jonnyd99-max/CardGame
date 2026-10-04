@@ -2639,3 +2639,115 @@ input[type="checkbox"] {
     display: none;
   }
 }
+
+/* The mode switch stays visible in the menu bar on desktop and mobile. */
+.game-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line, #d4cbbb);
+  border-radius: 999px;
+  padding: 3px;
+  background: #f4eddf;
+  flex-shrink: 0;
+  gap: 2px;
+}
+.game-mode-toggle button {
+  border: 0;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: transparent;
+  color: #514b45;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.game-mode-toggle button[aria-pressed="true"] {
+  background: #302c28;
+  color: #fff6e7;
+}
+.game-mode-toggle button:focus-visible {
+  outline: 2px solid var(--accent, #d33);
+  outline-offset: 2px;
+}
+.onboarding > .game-mode-toggle {
+  margin-bottom: 24px;
+}
+.card-art img.character-image.pokemon-artwork,
+.character-image.pokemon-artwork {
+  object-fit: contain;
+  padding: 12px;
+}
+.app:has(.pokemon-artwork) .hero .character-image {
+  object-fit: contain;
+}
+@media (max-width: 600px) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .topbar-right {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .game-mode-toggle button {
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+}
+
+.pokemon-evolution-path {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 16px 0;
+}
+.pokemon-evolution-path > div {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  max-width: 180px;
+  padding: 12px;
+  background: #fff6df;
+  border: 1px solid #d8caa8;
+  border-radius: 8px;
+  text-align: center;
+}
+.pokemon-evolution-path .character-image {
+  position: static;
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+}
+.pokemon-evolution-path span {
+  font-size: 12px;
+}
+.pokemon-item-art {
+  object-fit: contain;
+}
+.equipment-categories {
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.trainer-portrait {
+  object-fit: contain;
+  image-rendering: pixelated;
+  padding: 8px;
+}
+.pokemon-item-portrait {
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.equipment-art .pokemon-item-portrait {
+  padding: 18px;
+}
+.pokemon-health-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+.pokemon-health-row progress { display: block; width: 100%; height: 16px; margin-top: 8px; accent-color: #65a848; }
+.pokedex-summary { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 16px; }
+.pokedex-summary span { display: grid; gap: 4px; }
+.gym-leader-portrait { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; padding: 18px; }
+.gym-badge { font-weight: bold; color: #6b582d; }
+.type-matchup-strip { display: flex; flex-wrap: wrap; gap: 16px; padding: 12px; background: #edf1d5; border: 2px solid #637653; border-radius: 8px; margin: 12px 0; }
+.gym-badge-icon { width: 42px; height: 42px; vertical-align: middle; flex-shrink: 0; margin-right: 8px; }
+.badge-case { margin-bottom: 16px; }
+.badge-case > div { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }

@@ -1,3 +1,5 @@
+import { isPokemon } from "../game/gameMode";
+import { pokemonUnlockText } from "../game/pokemonProgression";
 import { progression } from "../data/unlocks";
 import { getCharacters } from "../data/characters";
 import { franchises } from "../data/franchises";
@@ -100,9 +102,21 @@ export function Groups({
         <div>
           <span className="eyebrow">STRONGER TOGETHER</span>
           <h1>
-            Teams & <em>groups.</em>
+            {isPokemon ? (
+              <>
+                Pokémon <em>types.</em>
+              </>
+            ) : (
+              <>
+                Teams & <em>groups.</em>
+              </>
+            )}
           </h1>
-          <p>Discover the alliances that shape each universe.</p>
+          <p>
+            {isPokemon
+              ? "Explore every original type. Dual-type Pokémon appear in both lists."
+              : "Discover the alliances that shape each universe."}
+          </p>
         </div>
       </div>
       {franchises.map((f) => (
@@ -117,7 +131,9 @@ export function Groups({
                 <div key={g.id}>
                   <h3>{g.name}</h3>
                   {characters
-                    .filter((c) => c.group === g.id)
+                    .filter((c) =>
+                      isPokemon ? c.tags.includes(f.id) : c.group === g.id,
+                    )
                     .map((c) => (
                       <button
                         className="group-character"
@@ -129,7 +145,8 @@ export function Groups({
                         <small>
                           {s.owned.includes(c.id)
                             ? "Owned"
-                            : `Level ${unlockLevelFor(c, s)}`}
+                            : pokemonUnlockText(c.id, s) ||
+                              `Level ${unlockLevelFor(c, s)}`}
                         </small>
                       </button>
                     ))}

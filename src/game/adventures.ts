@@ -1,3 +1,6 @@
+import { evolutionRequirement } from "../data/pokemonEvolution";
+import { isPokemon } from "./gameMode";
+import { unlockPokemonEvolutions } from "./pokemonProgression";
 import { characters } from "../data/characters";
 import { rangerWeapons } from "../data/weapons";
 import {
@@ -7,10 +10,16 @@ import {
   unlockLevelFor,
   validateDeck,
 } from "./progression";
-import { createBattle, type Battle } from "./battle";
+import { createBattle, ensurePokemonHealth, type Battle } from "./battle";
 import type { Save, Stats } from "../types";
+export function pokemonPackOdds(s: Save): number[] {
+  const eligible = characters.filter(c => !evolutionRequirement(c.id) && unlockLevelFor(c, s) <= playerLevel(s.xp));
+  const legendary = eligible.some(c => c.rarity === "Legendary") ? 5 : 0;
+  const mythic = eligible.some(c => c.rarity === "Mythic") ? 1 : 0;
+  return [100 - legendary - mythic, legendary, mythic];
+}
 
-export const chapters = [
+const multiverseChapters = [
   {
     id: "arrival",
     name: "Trouble in Angel Grove",
@@ -142,7 +151,75 @@ export const chapters = [
     boss: true,
   },
 ] as const;
-export type Chapter = (typeof chapters)[number];
+export interface Chapter {
+  id: string;
+  name: string;
+  story: string;
+  level: number;
+  opponents: readonly string[];
+  rounds: number;
+  coins: number;
+  xp: number;
+  item: string;
+  boss: boolean;
+  card?: string;
+}
+export const chapters: readonly Chapter[] = isPokemon
+  ? multiverseChapters.map((chapter, i) => ({
+      ...chapter,
+      boss: i >= 1 && i <= 8,
+      name: [
+        "Viridian Forest",
+        "Pewter Gym · Brock",
+        "Cerulean Gym · Misty",
+        "Vermilion Gym · Lt. Surge",
+        "Celadon Gym · Erika",
+        "Fuchsia Gym · Koga",
+        "Saffron Gym · Sabrina",
+        "Cinnabar Gym · Blaine",
+        "Viridian Gym · Giovanni",
+        "Cerulean Cave · Mewtwo",
+      ][i],
+      story: [
+        "Build your first Kanto team and battle the Pokémon of Viridian Forest.",
+        "Challenge Brock’s Rock Pokémon.",
+        "Face Misty’s Water Pokémon.",
+        "Take on Lt. Surge’s Electric team.",
+        "Battle Erika’s Grass team.",
+        "Overcome Koga’s Poison team.",
+        "Test your team against Sabrina’s Psychic Pokémon.",
+        "Face Blaine’s Fire team.",
+        "Defeat Giovanni’s Ground team.",
+        "Your final Kanto challenge: the legendary Mewtwo.",
+      ][i],
+      opponents: [
+        [10, 13, 11, 14],
+        [74, 95, 75, 95],
+        [120, 121, 54, 55],
+        [25, 26, 100, 101],
+        [43, 44, 45, 114],
+        [109, 110, 88, 89],
+        [63, 64, 97, 65],
+        [58, 59, 77, 78],
+        [111, 112, 31, 34],
+        [150],
+      ][i].map((n) => `pokemon-${n}`),
+      item: [
+        "wise-glasses",
+        "trainer-brock",
+        "trainer-misty",
+        "trainer-surge",
+        "trainer-erika",
+        "trainer-koga",
+        "trainer-sabrina",
+        "trainer-blaine",
+        "trainer-giovanni",
+        "mewtwonite-y",
+      ][i],
+      ...("card" in chapter ? { card: "pokemon-133" } : {}),
+    }))
+  : multiverseChapters;
+
 import { villainRewards } from "./villains";
 export { villainRewards } from "./villains";
 export function chapterAvailable(s: Save, id: string) {
@@ -173,6 +250,7 @@ export function campaignBattle(
   b.ai = [...stage.opponents];
   b.chapter = id;
   b.boss = stage.boss;
+  ensurePokemonHealth(b, s);
   return b;
 }
 export function claimChapter(s: Save, b: Battle) {
@@ -196,7 +274,7 @@ export function claimChapter(s: Save, b: Battle) {
   s.coins += stage.coins;
   s.materials += stage.boss ? 4 : 2;
   s.items[stage.item] ||= 1;
-  if ("card" in stage && !s.owned.includes(stage.card)) {
+  if (stage.card && !s.owned.includes(stage.card)) {
     s.owned.push(stage.card);
     s.cards[stage.card] ||= cardProgress();
   }
@@ -238,7 +316,7 @@ export function battleStats(
     power: Math.min(100, base.power + bonus.team),
   };
 }
-export const packTypes = [
+const multiversePackTypes = [
   {
     id: "scout",
     name: "Scout pack",
@@ -256,7 +334,16 @@ export const packTypes = [
     materials: 2,
   },
 ] as const;
+export const packTypes = isPokemon
+  ? multiversePackTypes.map((pack) => ({
+      ...pack,
+      name: pack.id === "scout" ? "Kanto basics pack" : "Kanto training pack",
+      odds: [100, 0, 0],
+      materials: pack.id === "hero" ? 4 : pack.materials,
+    }))
+  : multiversePackTypes;
 export interface PackResult {
+  shiny?: boolean;
   card: string;
   duplicate: boolean;
   coins: number;
@@ -273,16 +360,18 @@ export function openPack(
   const eligible = characters.filter(
     (c) =>
       !c.tags.includes("campaign-reward") &&
+      (!isPokemon || !evolutionRequirement(c.id)) &&
       c.unlockLevel <= playerLevel(s.xp) + 2 &&
-      ["Common", "Uncommon", "Rare"].includes(c.rarity),
+      (isPokemon ? unlockLevelFor(c, s) <= playerLevel(s.xp) : ["Common", "Uncommon", "Rare"].includes(c.rarity)),
   );
   const roll = Math.max(0, Math.min(0.999999, rng())) * 100;
+  const odds = isPokemon ? pokemonPackOdds(s) : pack.odds;
   const rarity =
-    roll < pack.odds[0]
+    roll < odds[0]
       ? "Common"
-      : roll < pack.odds[0] + pack.odds[1]
-        ? "Uncommon"
-        : "Rare";
+      : roll < odds[0] + odds[1]
+        ? isPokemon ? "Legendary" : "Uncommon"
+        : isPokemon ? "Mythic" : "Rare";
   const pool = eligible.filter((c) => c.rarity === rarity);
   const candidates = pool.length
     ? pool
@@ -302,8 +391,15 @@ export function openPack(
     s.cards[c.id] ||= cardProgress();
   }
   s.packsOpened = (s.packsOpened || 0) + 1;
+  const shiny = isPokemon && rng() < 0.05;
+  if (shiny && !(s.pokemonShinies || []).includes(c.id)) {
+    (s.pokemonShinies ||= []).push(c.id);
+    s.cards[c.id].style = "shiny";
+    unlockPokemonEvolutions(s);
+  }
   return {
     card: c.id,
+    shiny,
     duplicate,
     coins,
     materials: pack.materials + (duplicate ? 2 : 0),

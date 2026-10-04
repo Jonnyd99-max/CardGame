@@ -1,6 +1,27 @@
 import type { Character, Save } from "../types";
+import {
+  evolutionRequirement,
+  nextPokemonEvolutions,
+} from "../data/pokemonEvolution";
+import { pokemonMegaStones } from "../data/pokemonItems";
 
-export function evolvedArtwork(c: Character, stage: number): Character {
+export function evolvedArtwork(
+  c: Character,
+  stage: number,
+  s?: Save,
+): Character {
+  if (c.tags.includes("pokemon") && s) {
+    const stone = pokemonMegaStones.find(
+      (item) =>
+        s.cards[c.id]?.equipment.includes(item.id) &&
+        item.characters.includes(c.id),
+    );
+    return stone
+      ? { ...c, image: stone.megaArtwork!, imageSheet: undefined }
+      : s.cards[c.id]?.style === "shiny" && s.pokemonShinies?.includes(c.id)
+        ? { ...c, image: `/artwork/pokemon/shiny/${c.id.replace("pokemon-", "")}.png`, imageSheet: undefined }
+        : c;
+  }
   if (!stage) return c;
   if (c.customLook) return c;
   if (c.id.startsWith("enemy-") || !["rangers", "rick"].includes(c.franchise))
@@ -14,6 +35,25 @@ export function evolvedArtwork(c: Character, stage: number): Character {
 }
 
 export function evolutionFor(c: Character, s: Save) {
+  if (c.tags.includes("pokemon")) {
+    const requirement = evolutionRequirement(c.id);
+    const stage = requirement ? (requirement.level === 15 ? 2 : 1) : 0;
+    const next = nextPokemonEvolutions(c.id);
+    const mega = pokemonMegaStones.find(
+      (item) =>
+        s.cards[c.id]?.equipment.includes(item.id) &&
+        item.characters.includes(c.id),
+    );
+    return {
+      stage,
+      name: mega
+        ? "Mega Evolution"
+        : requirement
+          ? "Evolved Pokémon"
+          : "Basic Pokémon",
+      nextLevel: next[0]?.level,
+    };
+  }
   const level = s.owned.includes(c.id) ? s.cards[c.id]?.level || 1 : 1;
   const stage = c.customLook
     ? level >= 100
@@ -34,7 +74,9 @@ export function evolutionFor(c: Character, s: Save) {
   };
   return {
     stage,
-    name: (names[c.franchise] || names.marvel)[stage],
+    name: c.tags.includes("pokemon")
+      ? ["Rookie", "Trained", "Mastered"][stage]
+      : (names[c.franchise] || names.marvel)[stage],
     nextLevel:
       stage === 0
         ? c.customLook

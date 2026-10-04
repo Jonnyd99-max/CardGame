@@ -1,3 +1,4 @@
+import { isPokemon } from "../game/gameMode";
 import { progression } from "../data/unlocks";
 import {
   ArrowUpRight,
@@ -48,7 +49,11 @@ export function Home({
           <h1>
             Welcome back, <em>{s.name}.</em>
           </h1>
-          <p>Different universes. One ultimate collection.</p>
+          <p>
+            {isPokemon
+              ? "151 Pokémon. One Kanto adventure."
+              : "Different universes. One ultimate collection."}
+          </p>
         </div>
         <div className="season-label">
           <span className="live-dot" /> GENESIS COLLECTION{" "}
@@ -58,22 +63,32 @@ export function Home({
       <section className="hero">
         <div className="hero-grid" />
         <div className="hero-copy">
-          <div className="pill">✦ THE MULTIVERSE IS YOURS</div>
+          <div className="pill">
+            {isPokemon
+              ? "✦ GOTTA COLLECT THEM ALL"
+              : "✦ THE MULTIVERSE IS YOURS"}
+          </div>
           <h2>
-            Worlds collide.
+            {isPokemon ? "Kanto awaits." : "Worlds collide."}
             <br />
-            <span>Legends rise.</span>
+            <span>{isPokemon ? "Your team rises." : "Legends rise."}</span>
           </h2>
           <p>
             Assemble your dream deck. Choose your strongest stat.
-            <br className="desktop" /> Make your mark across the multiverse.
+            <br className="desktop" />{" "}
+            {isPokemon
+              ? "Make your mark across Kanto."
+              : "Make your mark across the multiverse."}
           </p>
           <button className="primary" onClick={() => navigate("Play")}>
             <Swords size={19} /> Enter the battle <ArrowUpRight size={19} />
           </button>
           <div className="hero-meta">
             <span>{characters.length} unique characters</span>
-            <i /> <span>4 iconic universes</span>
+            <i />{" "}
+            <span>
+              {isPokemon ? "15 original types" : "4 iconic universes"}
+            </span>
           </div>
         </div>
         <div className="hero-art">
@@ -131,7 +146,9 @@ export function Home({
             <small>PLAYER LEVEL</small>
             <strong>
               {playerLevel(s.xp)}
-              <span> dimensional explorer</span>
+              <span>
+                {isPokemon ? " Pokémon Trainer" : " dimensional explorer"}
+              </span>
             </strong>
           </section>
           <Progress
@@ -142,8 +159,14 @@ export function Home({
       </div>
       <div className="section-heading">
         <div>
-          <h2>Choose your universe</h2>
-          <p>Every world has a legend. Find yours.</p>
+          <h2>
+            {isPokemon ? "Explore Pokémon types" : "Choose your universe"}
+          </h2>
+          <p>
+            {isPokemon
+              ? "Discover all 15 original types, including dual-type Pokémon."
+              : "Every world has a legend. Find yours."}
+          </p>
         </div>
         <button
           className="text-button"
@@ -160,7 +183,9 @@ export function Home({
             style={{ "--universe": f.color } as React.CSSProperties}
             onClick={() => navigate(`Collection:${f.id}`)}
           >
-            <span className="universe-no">0{i + 1}</span>
+            <span className="universe-no">
+              {String(i + 1).padStart(2, "0")}
+            </span>
             <span className="universe-symbol">{f.symbol}</span>
             <div>
               <small>{f.subtitle}</small>

@@ -1,3 +1,8 @@
+import { pokemonItems, heldItemTypes } from "../data/pokemonItems";
+import { evolutionRequirement } from "../data/pokemonEvolution";
+import { unlockPokemonEvolutions } from "./pokemonProgression";
+import { isPokemon } from "./gameMode";
+import { battleStatKeys } from "./statPresentation";
 import { characters, getCharacter, getCharacters } from "../data/characters";
 import { equipment } from "../data/equipment";
 import { weapons } from "../data/weapons";
@@ -11,7 +16,7 @@ import {
   type Item,
   type Deck,
 } from "../types";
-export const items = [...equipment, ...weapons];
+export const items = isPokemon ? pokemonItems : [...equipment, ...weapons];
 export const playerLevel = (xp: number) =>
   Math.min(config.maxPlayerLevel, 1 + Math.floor(xp / config.xpPerPlayerLevel));
 export const cardProgress = () => ({
@@ -24,6 +29,11 @@ export const cardProgress = () => ({
   wins: 0,
 });
 export function unlockLevelFor(c: Character, s: Save) {
+  if (isPokemon && evolutionRequirement(c.id)) return 101;
+  if (isPokemon)
+    return c.franchise === (s.starterFranchise || s.franchise)
+      ? c.unlockLevel
+      : Math.max(3, c.unlockLevel);
   return c.franchise === (s.starterFranchise || s.franchise)
     ? c.unlockLevel
     : Math.max(
@@ -87,8 +97,10 @@ export function statsFor(c: Character, s: Save): Stats {
           p.equipment.reduce(
             (v, id) =>
               v +
-              (items.find((e) => e.id === id)?.modifiers[k] || 0) *
-                (s.items[id] || 1),
+              ((items.find((e) => e.id === id)?.modifiers[k] || 0) +
+                (items.find((e) => e.id === id)?.grantedAbility?.modifiers[k] ||
+                  0)) *
+                (items.find(e => e.id === id)?.category === "mega-stone" ? 1 : s.items[id] || 1),
             0,
           ) +
           p.abilities.reduce(
@@ -104,12 +116,13 @@ export function statsFor(c: Character, s: Save): Stats {
   ) as Stats;
 }
 export const powerFor = (c: Character, s: Save) =>
-  Math.round(Object.values(statsFor(c, s)).reduce((a, b) => a + b, 0) / 8);
+  Math.round(battleStatKeys.reduce((total, k) => total + statsFor(c, s)[k], 0) / battleStatKeys.length);
 export function compatible(c: Character, item: Item) {
   const allowed =
     item.slot === "weapon" ? c.compatibleWeapons : c.compatibleEquipment;
   return (
     (!allowed.length || allowed.includes(item.id)) &&
+    (!heldItemTypes[item.id] || c.tags.includes(heldItemTypes[item.id])) &&
     (!item.franchises.length || item.franchises.includes(c.franchise)) &&
     (!item.groups.length || item.groups.includes(c.group)) &&
     (!item.characters.length || item.characters.includes(c.id))
@@ -134,11 +147,37 @@ export function toggleEquipment(s: Save, characterId: string, itemId: string) {
   );
   if (!removing) {
     p.equipment.push(itemId);
+    if (item.category === "mega-stone" && !(s.pokemonMegaSeen || []).includes(itemId))
+      (s.pokemonMegaSeen ||= []).push(itemId);
     s.equips++;
   }
   return true;
 }
+export function upgradeCharacter(s: Save, id: string): string[] | null {
+  const c = getCharacter(id, s);
+  const p = s.cards[id];
+  if (
+    !c ||
+    !p ||
+    !s.owned.includes(id) ||
+    p.level >= c.maxLevel ||
+    s.coins < p.level * config.characterLevelCoinMultiplier ||
+    s.materials < 1 ||
+    p.xp < config.xpPerCharacterLevel
+  )
+    return null;
+  s.coins -= p.level * config.characterLevelCoinMultiplier;
+  s.materials--;
+  p.xp -= config.xpPerCharacterLevel;
+  p.level++;
+  s.upgrades++;
+  return isPokemon ? unlockPokemonEvolutions(s) : [];
+}
 export function unlock(s: Save) {
+  if (isPokemon) {
+    unlockPokemonEvolutions(s);
+    return s;
+  }
   const level = playerLevel(s.xp);
   characters
     .filter((c) => unlockLevelFor(c, s) <= level)
@@ -169,9 +208,15 @@ export function validateDeck(d: Deck, s: Save): string {
   const cs = d.cards.map((id) => getCharacter(id, s)!);
   if (
     d.rule === "Single Franchise" &&
-    new Set(cs.map((c) => c.franchise)).size > 1
+    (isPokemon
+      ? !cs[0].tags.some(
+          (t) => t !== "pokemon" && cs.every((c) => c.tags.includes(t)),
+        )
+      : new Set(cs.map((c) => c.franchise)).size > 1)
   )
-    return "Choose one universe.";
+    return isPokemon
+      ? "Choose Pokémon sharing one type."
+      : "Choose one universe.";
   if (d.rule === "Single Group" && new Set(cs.map((c) => c.group)).size > 1)
     return "Choose one group.";
   return "";

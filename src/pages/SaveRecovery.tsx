@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import { parseSave, SAVE_KEY } from "../state/save";
 import { Modal } from "../components/UI";
 import type { Save } from "../types";
+import { GameModeToggle } from "../components/GameModeToggle";
 export function SaveRecovery({
   message,
   restore,
@@ -16,6 +17,7 @@ export function SaveRecovery({
   const input = useRef<HTMLInputElement>(null);
   return (
     <main className="onboarding">
+      <GameModeToggle />
       <span className="eyebrow">YOUR PROGRESS MATTERS</span>
       <h1>
         Let’s restore

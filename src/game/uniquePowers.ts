@@ -1,3 +1,6 @@
+import { isPokemon } from "./gameMode";
+import { statLabel } from "./statPresentation";
+import { pokemonCharacters } from "../data/pokemon";
 import type { Stats, Stat } from "../types";
 export const uniquePowers: Record<
   string,
@@ -59,6 +62,26 @@ export const uniquePowers: Record<
     modifiers: { speed: 12, combat: 6 },
   },
 };
+if (isPokemon) {
+  const moves: Record<string, { name: string; modifiers: Partial<Stats> }> = {
+    normal: { name: "Body Slam", modifiers: { strength: 10, durability: 6 } },
+    fire: { name: "Flamethrower", modifiers: { power: 12, special: 6 } },
+    water: { name: "Surf", modifiers: { power: 10, durability: 8 } },
+    electric: { name: "Thunderbolt", modifiers: { power: 12, speed: 6 } },
+    grass: { name: "Solar Beam", modifiers: { special: 12, durability: 6 } },
+    ice: { name: "Ice Beam", modifiers: { special: 12, power: 6 } },
+    fighting: { name: "Submission", modifiers: { combat: 12, strength: 6 } },
+    poison: { name: "Sludge", modifiers: { special: 10, combat: 8 } },
+    ground: { name: "Earthquake", modifiers: { strength: 12, power: 6 } },
+    flying: { name: "Sky Attack", modifiers: { speed: 12, combat: 6 } },
+    psychic: { name: "Psychic", modifiers: { intelligence: 12, special: 6 } },
+    bug: { name: "Pin Missile", modifiers: { speed: 10, combat: 8 } },
+    rock: { name: "Rock Slide", modifiers: { durability: 12, strength: 6 } },
+    ghost: { name: "Night Shade", modifiers: { special: 12, intelligence: 6 } },
+    dragon: { name: "Dragon Rage", modifiers: { power: 12, strength: 6 } },
+  };
+  for (const c of pokemonCharacters) uniquePowers[c.id] = moves[c.franchise];
+}
 export function uniqueEffect(
   id: string,
   stat: Stat,
@@ -92,8 +115,10 @@ export function uniqueEffect(
   };
 }
 export function modifyStats(values: Stats, modifiers?: Partial<Stats>) {
-  for (const [k, v] of Object.entries(modifiers || {}))
-    values[k as Stat] = Math.max(1, Math.min(100, values[k as Stat] + v!));
+  for (const [k, v] of Object.entries(modifiers || {})) {
+    const key = isPokemon && k === "combat" ? "strength" : isPokemon && k === "special" ? "power" : k as Stat;
+    values[key] = Math.max(1, Math.min(100, values[key] + v!));
+  }
 }
 export function uniqueDescription(id: string, stat: Stat, stage = 0) {
   if (id === "rick-6")
@@ -102,11 +127,11 @@ export function uniqueDescription(id: string, stat: Stat, stage = 0) {
     return `+${12 + stage * 2} durability and +${6 + stage * 2} combat this round.`;
   const effect = uniqueEffect(id, stat, stage, () => 0);
   const parts = Object.entries(effect.modifiers || {}).map(
-    ([k, v]) => `${v! > 0 ? "+" : ""}${v} own ${k}`,
+    ([k, v]) => `${v! > 0 ? "+" : ""}${v} own ${statLabel(k)}`,
   );
   parts.push(
     ...Object.entries(effect.enemyModifiers || {}).map(
-      ([k, v]) => `${v} rival ${k}`,
+      ([k, v]) => `${v} rival ${statLabel(k)}`,
     ),
   );
   if (effect.swapEnemy) parts.push("swap the rival's power and intelligence");

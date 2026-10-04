@@ -1,7 +1,7 @@
 import { Lock, Star } from "lucide-react";
 import { rarities } from "../data/rarities";
 import { franchises } from "../data/franchises";
-import { powerFor, statsFor, unlockLevelFor } from "../game/progression";
+import { powerFor, statsFor, unlockLevelFor, playerLevel } from "../game/progression";
 import type { Character, Save, Stats } from "../types";
 import { items } from "../game/progression";
 import { ItemArtwork } from "./ItemArtwork";
@@ -9,6 +9,8 @@ import { assetUrl } from "../game/assetUrl";
 import { evolutionFor, evolvedArtwork } from "../game/evolution";
 import { villainChapter } from "../game/villains";
 import { HeroArtwork } from "./HeroArtwork";
+import { pokemonUnlockText } from "../game/pokemonProgression";
+import { battleStatKeys } from "../game/statPresentation";
 export function Artwork({ character: c }: { character: Character }) {
   if (c.customLook) return <HeroArtwork look={c.customLook} />;
   if (c.image && c.imageSheet) {
@@ -27,7 +29,12 @@ export function Artwork({ character: c }: { character: Character }) {
     );
   }
   return c.image ? (
-    <img className="character-image" src={assetUrl(c.image)} alt={c.name} />
+    <img
+      className={`character-image ${c.tags.includes("pokemon") ? "pokemon-artwork" : ""}`}
+      src={assetUrl(c.image)}
+      loading="lazy"
+      alt={c.name}
+    />
   ) : (
     <svg
       className="character-image"
@@ -134,12 +141,17 @@ export function Card({
         } as React.CSSProperties
       }
       onClick={onClick}
-      aria-label={`${c.name}, ${c.rarity}${locked ? ", locked" : ""}`}
+      aria-label={`${c.name}, ${c.rarity}${p?.style === "shiny" ? ", shiny" : ""}${locked ? ", locked" : ""}`}
     >
       <div className="card-top">
         <span>
           {franchises.find((f) => f.id === c.franchise)?.symbol}{" "}
-          {franchises.find((f) => f.id === c.franchise)?.name}
+          {c.tags.includes("pokemon")
+            ? c.tags
+                .filter((t) => t !== "pokemon")
+                .map((t) => t[0].toUpperCase() + t.slice(1))
+                .join(" / ")
+            : franchises.find((f) => f.id === c.franchise)?.name}
         </span>
         <span>
           {locked ? (
@@ -152,7 +164,7 @@ export function Card({
         </span>
       </div>
       <div className="card-art">
-        <Artwork character={evolvedArtwork(c, evolution.stage)} />
+        <Artwork character={evolvedArtwork(c, evolution.stage, s)} />
         {!!evolution.stage && (
           <div className="evolution-crest">
             {evolution.stage === 2 ? "★★" : "★"} {evolution.name}
@@ -176,9 +188,11 @@ export function Card({
           <div className="lock-label">
             <Lock size={25} />
             <span>
-              {villainChapter(c.id)
-                ? "Win its campaign chapter to collect"
-                : `Unlock at level ${unlockLevelFor(c, s)}`}
+              {c.tags.includes("pokemon") && pokemonUnlockText(c.id, s)
+                ? pokemonUnlockText(c.id, s).split(". ")[0]
+                : !c.tags.includes("pokemon") && villainChapter(c.id)
+                  ? "Win its campaign chapter to collect"
+                  : c.tags.includes("pokemon") ? unlockLevelFor(c, s) <= playerLevel(s.xp) ? "Available in packs" : `Packs unlock at level ${unlockLevelFor(c, s)}` : `Unlock at level ${unlockLevelFor(c, s)}`}
             </span>
           </div>
         )}
@@ -187,7 +201,7 @@ export function Card({
             <strong>
               {battleValues
                 ? Math.round(
-                    Object.values(stats).reduce((a, b) => a + b, 0) / 8,
+                    battleStatKeys.reduce((sum, k) => sum + stats[k], 0) / battleStatKeys.length,
                   )
                 : powerFor(c, s)}
             </strong>
@@ -197,7 +211,7 @@ export function Card({
       </div>
       <div className="card-bottom">
         <small style={{ color: rarities[c.rarity] }}>
-          ◆ {c.rarity.toUpperCase()}
+          {p?.style === "shiny" ? "✦ SHINY · " : "◆ "}{c.rarity.toUpperCase()}
         </small>
         <h3>{c.name}</h3>
         {hideStats ? (
@@ -205,13 +219,13 @@ export function Card({
         ) : (
           <div className="card-mini-stats">
             <span>
-              STR <b>{stats.strength}</b>
+              {c.tags.includes("pokemon") ? "ATK" : "STR"} <b>{stats.strength}</b>
             </span>
             <span>
               SPD <b>{stats.speed}</b>
             </span>
             <span>
-              INT <b>{stats.intelligence}</b>
+              {c.tags.includes("pokemon") ? "DEF" : "INT"} <b>{c.tags.includes("pokemon") ? stats.durability : stats.intelligence}</b>
             </span>
           </div>
         )}

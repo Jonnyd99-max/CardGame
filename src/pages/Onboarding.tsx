@@ -1,3 +1,5 @@
+import { isPokemon } from "../game/gameMode";
+import { GameModeToggle } from "../components/GameModeToggle";
 import { useState } from "react";
 import { ArrowRight, Zap } from "lucide-react";
 import { franchises } from "../data/franchises";
@@ -10,16 +12,22 @@ export function Onboarding({
 }) {
   const [step, setStep] = useState(0),
     [name, setName] = useState(""),
-    [franchise, setFranchise] = useState("rangers"),
-    [character, setCharacter] = useState("rangers-0");
+    [franchise, setFranchise] = useState(franchises[0].id),
+    [character, setCharacter] = useState(
+      characters.find(
+        (c) => c.franchise === franchises[0].id && c.unlockLevel === 1,
+      )!.id,
+    );
   return (
     <main className="onboarding">
+      <GameModeToggle />
       <div className="brand">
         <span className="brand-mark">
           <Zap fill="currentColor" />
         </span>
         <div>
-          JD MULTIVERSE<small>BATTLE CARDS</small>
+          {isPokemon ? "JD POKÉMON" : "JD MULTIVERSE"}
+          <small>BATTLE CARDS</small>
         </div>
       </div>
       <span className="eyebrow">YOUR ORIGIN STORY · 0{step + 1} / 03</span>
@@ -33,7 +41,7 @@ export function Onboarding({
           <>
             Choose your
             <br />
-            <em>universe.</em>
+            <em>{isPokemon ? "type." : "universe."}</em>
           </>
         ) : (
           <>
@@ -45,10 +53,16 @@ export function Onboarding({
       </h1>
       <p>
         {step === 0
-          ? "A collection across worlds. A battle beyond limits. What should we call you?"
+          ? isPokemon
+            ? "Collect the original 151 Pokémon. What should we call you, Trainer?"
+            : "A collection across worlds. A battle beyond limits. What should we call you?"
           : step === 1
-            ? "Your universe sets your starting deck and visual theme. You can change it anytime."
-            : "Four starter cards are yours. Choose the face of your adventure."}
+            ? isPokemon
+              ? "Choose your favourite type for your Kanto team and theme. You can change it anytime."
+              : "Your universe sets your starting deck and visual theme. You can change it anytime."
+            : isPokemon
+              ? "Four Common basic Pokémon are yours. Choose your starter, then upgrade it to unlock evolutions."
+              : "Four starter cards are yours. Choose the face of your adventure."}
       </p>
       {step === 0 ? (
         <label className="name-input">
@@ -72,7 +86,11 @@ export function Onboarding({
               key={f.id}
               onClick={() => {
                 setFranchise(f.id);
-                setCharacter(`${f.id}-0`);
+                setCharacter(
+                  characters.find(
+                    (c) => c.franchise === f.id && c.unlockLevel === 1,
+                  )!.id,
+                );
               }}
             >
               <span style={{ color: f.color }}>{f.symbol}</span>

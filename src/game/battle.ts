@@ -3,6 +3,8 @@ import { battleCharacters } from "../data/enemies";
 import { statsFor, grantXP, refreshPeriods } from "./progression";
 import { progression } from "../data/unlocks";
 import { battleStats } from "./adventures";
+import { applyPokemonMatchup, pokemonMatchupBonus } from "./pokemonMatchups";
+import { battleStatKeys } from "./statPresentation";
 import {
   uniquePowers,
   uniqueEffect,
@@ -24,7 +26,7 @@ export function aiStat(
   own: Stats,
   difficulty: Difficulty,
   rng = Math.random,
-  available: readonly Stat[] = statKeys,
+  available: readonly Stat[] = battleStatKeys,
 ): Stat | undefined {
   if (!available.length) return undefined;
   if (difficulty === "Easy" || (difficulty === "Normal" && rng() < 0.35))
@@ -43,6 +45,8 @@ export function aiStat(
   )[0];
 }
 export interface Battle {
+  health?: { player: number[]; ai: number[]; playerMax: number[]; aiMax: number[] };
+  encountered?: string[];
   opponentAbility?: {
     round: number;
     character: string;
@@ -91,6 +95,8 @@ export interface Battle {
     enemyStats?: Stats;
     abilityNotices?: AbilityNotice[];
     chooser?: "player" | "ai";
+    damage?: number;
+    fainted?: string[];
   };
   log: string[];
   strengthWins: number;
@@ -127,7 +133,7 @@ export function matchPrizes(
     };
   const rounds = Math.min(b.round, progression.rewardedRoundCap);
   const wins = Math.min(b.scores[0], rounds);
-  const duration = Math.min(roundLimit(b), progression.rewardedRoundCap);
+  const duration = Math.min(b.participants[0]?.startsWith("pokemon-") ? b.participants.length : roundLimit(b), progression.rewardedRoundCap);
   const won = b.result === "player";
   const bonusXP = won ? 12 + duration * 2 : 0;
   const bonusCoins = won ? 18 + duration * 3 : 0;
@@ -205,6 +211,7 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
       },
     };
   const next = structuredClone(b);
+  ensurePokemonHealth(next, s);
   next.usedStats ||= { player: [], ai: [] };
   next.usedStats[b.turn].push(stat);
   const p = getCharacter(b.player[0], s)!,
@@ -239,6 +246,31 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
     next.scores[winner === "player" ? 0 : 1]++;
     next.turn = winner;
     if (winner === "player" && stat === "strength") next.strengthWins++;
+  }
+  if (next.health) {
+    const hp = next.health;
+    const damage = winner === "draw" ? 10 : Math.min(30, 10 + Math.floor(Math.abs(ps[stat] - as[stat]) / 3));
+    next.last.damage = damage;
+    next.last.fainted = [];
+    for (const side of ["player", "ai"] as const) {
+      if (winner === side) continue;
+      hp[side][0] = Math.max(0, hp[side][0] - damage);
+      if (!hp[side][0]) {
+        const fainted = next[side].shift()!;
+        hp[side].shift();
+        hp[side === "player" ? "playerMax" : "aiMax"].shift();
+        next.last.fainted.push(fainted);
+        if (side === "ai" && next.ai[0] && !next.encountered?.includes(next.ai[0])) (next.encountered ||= []).push(next.ai[0]);
+        next.log.unshift(`${getCharacter(fainted, s)!.name} fainted. ${next[side].length ? "The next Pokémon enters." : "No Pokémon remain."}`);
+        next.usedStats[side] = [];
+      }
+    }
+    if (!next.player.length || !next.ai.length)
+      next.result = !next.player.length && !next.ai.length ? "draw" : next.player.length ? "player" : "ai";
+    // Fresh comparison choices after each set; health persists until fainting.
+    for (const side of ["player", "ai"] as const)
+      if (!availableStats(next, side).length) next.usedStats[side] = [];
+    return next;
   }
   if (b.mode === "Classic") {
     const pair = [next.player.shift()!, next.ai.shift()!];
@@ -290,10 +322,17 @@ export function playRound(b: Battle, stat: Stat, s: Save): Battle {
   return next;
 }
 export function availableStats(b: Battle, side: "player" | "ai"): Stat[] {
-  return statKeys.filter((stat) => !b.usedStats?.[side].includes(stat));
+  return battleStatKeys.filter((stat) => !b.usedStats?.[side].includes(stat));
+}
+export function ensurePokemonHealth(b: Battle, s: Save) {
+  if (b.health || !b.player.every(id => id.startsWith("pokemon-")) || !b.ai.every(id => id.startsWith("pokemon-"))) return;
+  const player = b.player.map(id => Math.max(10, statsFor(getCharacter(id, s)!, s).tech));
+  const ai = b.ai.map(id => Math.max(10, getCharacter(id, s)!.baseStats.tech));
+  b.health = { player, ai, playerMax: [...player], aiMax: [...ai] };
+  b.encountered = b.ai[0] ? [b.ai[0]] : [];
 }
 export function opponentStats(b: Battle, base: Stats): Stats {
-  const phase = b.boss ? Math.min(2, Math.floor(b.round / 3)) : 0;
+  const phase = b.boss && !b.ai[0]?.startsWith("pokemon-") ? Math.min(2, Math.floor(b.round / 3)) : 0;
   const values = Object.fromEntries(
     statKeys.map((k) => [k, Math.min(100, base[k] + phase * 3)]),
   ) as Stats;
@@ -313,7 +352,7 @@ export function opponentStats(b: Battle, base: Stats): Stats {
     } else if (a.modifiers) modifyStats(values, a.modifiers);
     else values[a.stat] = a.value ?? Math.min(100, values[a.stat] + 8);
   }
-  return values;
+  return applyPokemonMatchup(values, b.last?.aiId || b.ai[0], b.last?.playerId || b.player[0]);
 }
 function enemyHasPower(b: Battle, name: string) {
   return b.chapter === name || (b.last?.aiId || b.ai[0]) === `enemy-${name}`;
@@ -337,6 +376,17 @@ export interface AbilityNotice {
 export function abilityNotices(b: Battle): AbilityNotice[] {
   if (b.last?.abilityNotices) return b.last.abilityNotices;
   const notices: AbilityNotice[] = [];
+  const playerId = b.last?.playerId || b.player[0];
+  const aiId = b.last?.aiId || b.ai[0];
+  for (const [side, own, enemy] of [["player", playerId, aiId], ["ai", aiId, playerId]] as const) {
+    const bonus = pokemonMatchupBonus(own, enemy);
+    if (bonus) notices.push({
+      title: `${getCharacter(own)?.name || "Pokémon"}: type ${bonus > 0 ? "advantage" : "disadvantage"}`,
+      description: `All stats ${bonus > 0 ? "gain +5" : "lose 5"} against ${getCharacter(enemy)?.name || "this opponent"} this round (1–100).`,
+      side,
+      stats: [...statKeys],
+    });
+  }
   const curse = ritaCurse(b);
   if (curse)
     notices.push({
@@ -359,7 +409,7 @@ export function abilityNotices(b: Battle): AbilityNotice[] {
       side: "ai",
       stats: ["power", "intelligence"],
     });
-  const phase = b.boss ? Math.min(2, Math.floor(b.round / 3)) : 0;
+  const phase = b.boss && !b.ai[0]?.startsWith("pokemon-") ? Math.min(2, Math.floor(b.round / 3)) : 0;
   if (phase)
     notices.push({
       title: `Boss powers up — phase ${phase + 1}!`,
@@ -464,7 +514,7 @@ export function activateAbility(
   };
   if (uniquePowers[id] && id !== "rick-6" && id !== "rangers-6")
     Object.assign(next.abilityRound!, uniqueEffect(id, stat, stage, rng));
-  const notice = abilityNotices(next).find((n) => n.side === "player")!;
+  const notice = abilityNotices(next).find((n) => n.side === "player" && n.title.includes(" uses "))!;
   next.log.unshift(`${notice.title}: ${notice.description}`);
   return next;
 }
@@ -498,9 +548,10 @@ export function combatStats(b: Battle, id: string, base: Stats): Stats {
         a.value ??
         Math.min(100, values[a.stat] + 8 + (a.evolutionStage || 0) * 2);
   }
-  return values;
+  return applyPokemonMatchup(values, id, b.last?.aiId || b.ai[0]);
 }
 export function ritaCurse(b: Battle): Stat | undefined {
+  if (b.ai[0]?.startsWith("pokemon-")) return undefined;
   if (b.chapter !== "titan" && (b.last?.aiId || b.ai[0]) !== "enemy-rita")
     return undefined;
   return statKeys[(b.last ? b.round - 1 : b.round) % statKeys.length];
@@ -508,6 +559,8 @@ export function ritaCurse(b: Battle): Stat | undefined {
 export function rewardMatch(s: Save, b: Battle) {
   if (!b.result) return s;
   refreshPeriods(s);
+  const seen = b.encountered || [...b.ai, ...(b.last ? [b.last.aiId] : [])];
+  if (b.participants[0]?.startsWith("pokemon-")) s.pokemonSeen = [...new Set([...(s.pokemonSeen || []), ...seen])];
   const won = b.result === "player";
   const prizes = matchPrizes(b);
   if (won) {

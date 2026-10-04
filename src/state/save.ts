@@ -1,3 +1,5 @@
+import { migratePokemonSave } from "../game/pokemonProgression";
+import { isPokemon } from "../game/gameMode";
 import { characters, getCharacter } from "../data/characters";
 import { validHero, customHeroId } from "../game/customHeroes";
 import { franchises } from "../data/franchises";
@@ -13,16 +15,34 @@ import {
 } from "../game/progression";
 import { statKeys, type Save } from "../types";
 import { chapters } from "../game/adventures";
-export const SAVE_KEY = "jd-multiverse-v1";
+export const SAVE_KEY = isPokemon ? "jd-pokemon-v1" : "jd-multiverse-v1";
 export function newSave(
   name: string,
   franchise: string,
   favourite: string,
 ): Save {
-  const owned = characters
-    .filter((c) => c.franchise === franchise && c.unlockLevel === 1)
+  let owned = characters
+    .filter(
+      (c) =>
+        c.franchise === franchise &&
+        c.unlockLevel === 1 &&
+        (!isPokemon || c.rarity === "Common"),
+    )
     .map((c) => c.id);
+  if (isPokemon) {
+    owned = [
+      ...new Set([
+        ...owned.slice(0, 4),
+        "pokemon-1",
+        "pokemon-4",
+        "pokemon-7",
+        "pokemon-25",
+      ]),
+    ].slice(0, 4);
+  }
+  if (isPokemon && !owned.includes(favourite)) favourite = owned[0];
   return {
+    ...(isPokemon ? { pokemonProgressionVersion: 1 as const, pokemonAcquisitionVersion: 1 as const } : {}),
     version: 1,
     presentationVersion: 2,
     balanceVersion: 1,
@@ -37,9 +57,9 @@ export function newSave(
     decks: [
       {
         id: "starter",
-        name: "First dimension",
+        name: isPokemon ? "First Kanto team" : "First dimension",
         cards: [...owned],
-        rule: "Single Franchise",
+        rule: isPokemon ? "Mixed Universe" : "Single Franchise",
       },
     ],
     activeDeck: "starter",
@@ -107,6 +127,14 @@ export function parseSave(raw: string): Save {
   )
     fail();
   if (s.customHero !== undefined && !validHero(s.customHero)) fail();
+  if (isPokemon) {
+    if (
+      s.pokemonProgressionVersion !== undefined &&
+      s.pokemonProgressionVersion !== 1
+    )
+      fail();
+    migratePokemonSave(s);
+  }
   if (
     !stringArray(s.owned) ||
     !s.owned.length ||
@@ -182,6 +210,11 @@ export function parseSave(raw: string): Save {
     fail();
   if (s.owned.some((id) => !s.cards[id])) fail();
   if (s.packsOpened !== undefined && !integer(s.packsOpened)) fail();
+  for (const key of ["pokemonSeen", "pokemonShinies"] as const) {
+    const ids = s[key];
+    if (ids !== undefined && (!stringArray(ids) || new Set(ids).size !== ids.length || ids.some(id => !id.startsWith("pokemon-") || !getCharacter(id, s)))) fail();
+  }
+  if (s.pokemonMegaSeen !== undefined && (!stringArray(s.pokemonMegaSeen) || new Set(s.pokemonMegaSeen).size !== s.pokemonMegaSeen.length || s.pokemonMegaSeen.some(id => !items.some(i => i.id === id && i.category === "mega-stone")))) fail();
   if (
     s.campaignStars !== undefined &&
     (!record(s.campaignStars) ||
@@ -210,7 +243,7 @@ export function parseSave(raw: string): Save {
       !stringArray(p.equipment) ||
       !stringArray(p.abilities) ||
       !record(p.boosts) ||
-      !["original", "holographic"].includes(p.style)
+      !["original", "holographic", ...(isPokemon && s.pokemonShinies?.includes(id) ? ["shiny"] : [])].includes(p.style)
     )
       fail();
     if (
@@ -275,7 +308,11 @@ export const saveStorage = {
     try {
       const raw = localStorage.getItem(SAVE_KEY);
       this.error = "";
-      return raw ? parseSave(raw) : null;
+      if (!raw) return null;
+      const parsed = parseSave(raw);
+      if (isPokemon && parsed.owned.length < (JSON.parse(raw).owned?.length || 0) && !localStorage.getItem(`${SAVE_KEY}-before-pack-progression`))
+        localStorage.setItem(`${SAVE_KEY}-before-pack-progression`, raw);
+      return parsed;
     } catch (error) {
       this.error =
         error instanceof Error

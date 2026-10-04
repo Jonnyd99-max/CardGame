@@ -1,4 +1,6 @@
-export const groups = [
+import { isPokemon } from "../game/gameMode";
+import { pokemonTypes } from "./pokemon";
+const multiverseGroups = [
   { id: "morphin", name: "Mighty Morphin Power Rangers", franchise: "rangers" },
   { id: "avengers", name: "Avengers", franchise: "marvel" },
   { id: "spider", name: "Spider heroes", franchise: "marvel" },
@@ -11,3 +13,11 @@ export const groups = [
   { id: "citadel", name: "Citadel", franchise: "rick" },
   { id: "creatures", name: "Creatures & villains", franchise: "rick" },
 ];
+
+export const groups = isPokemon
+  ? pokemonTypes.map((t) => ({
+      id: `${t.id}-type`,
+      name: `${t.name} Pokémon`,
+      franchise: t.id,
+    }))
+  : multiverseGroups;

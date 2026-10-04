@@ -1,3 +1,6 @@
+import { isPokemon } from "../game/gameMode";
+import { battleStatKeys, statLabel } from "../game/statPresentation";
+import { pokemonMatchupBonus } from "../game/pokemonMatchups";
 import { useState, useEffect, useCallback } from "react";
 import { Swords, ArrowRight, Trophy } from "lucide-react";
 import { characters, getCharacter } from "../data/characters";
@@ -19,9 +22,10 @@ import {
   combatStats,
   availableStats,
   abilityNotices,
+  ensurePokemonHealth,
   type Battle as Match,
 } from "../game/battle";
-import { statsFor, validateDeck } from "../game/progression";
+import { statsFor, validateDeck, items } from "../game/progression";
 import {
   battleStats,
   rangerBonus,
@@ -60,7 +64,7 @@ export function BattlePage({
       !!initialBattle?.chapter && !!s.campaign?.includes(initialBattle.chapter),
   );
   const [abilityStat, setAbilityStat] =
-    useState<(typeof statKeys)[number]>("combat");
+    useState<(typeof statKeys)[number]>(isPokemon ? "power" : "combat");
   const resolve = useCallback(
     (stat: (typeof statKeys)[number]) => {
       if (!battle || battle.last || battle.result) return;
@@ -157,16 +161,18 @@ export function BattlePage({
             >
               <span>0{i + 1}</span>
               <Swords size={30} />
-              <h2>{m}</h2>
+              <h2>{isPokemon ? ["Quick Battle", "Full Team", "Training Battle", "Team Battle", "Type Challenge"][i] : m}</h2>
               <p>
                 {
-                  [
+                  (isPokemon ? ["Two Pokémon per side. Last team standing wins.", "Your whole deck battles until one team faints.", "Practise stat comparisons with persistent health.", "Your custom lineup against a rival team.", "Face Pokémon of other types."] : [
                     "A fast, best-of-three showdown.",
                     "Capture every card. Ties build a prize pot.",
                     "A balanced clash over 5, 7 or 9 rounds.",
                     "Your custom lineup against a rival team.",
-                    "Face cards from other universes.",
-                  ][i]
+                    isPokemon
+                      ? "Face Pokémon of other types."
+                      : "Face cards from other universes.",
+                  ])[i]
                 }
               </p>
             </button>
@@ -194,7 +200,7 @@ export function BattlePage({
               ))}
             </select>
           </label>
-          {(mode === "Best of" || mode === "Crossover Battle") && (
+          {!isPokemon && (mode === "Best of" || mode === "Crossover Battle") && (
             <label>
               Round limit
               <select
@@ -213,7 +219,7 @@ export function BattlePage({
             onClick={() => {
               setBattle(
                 createBattle(
-                  s.decks.find((d) => d.id === deck)!.cards,
+                  isPokemon && mode === "Quick Battle" ? s.decks.find((d) => d.id === deck)!.cards.slice(0, 2) : s.decks.find((d) => d.id === deck)!.cards,
                   mode,
                   difficulty,
                   rounds,
@@ -230,7 +236,7 @@ export function BattlePage({
         </div>
         <div className="panel">
           <h2>Earn your prizes</h2>
-          {mode !== "Classic" && (
+          {!isPokemon && mode !== "Classic" && (
             <p>
               <strong>
                 A {sweepRounds}–0 clean sweep: {sweep.xp} XP · {sweep.coins}{" "}
@@ -241,22 +247,18 @@ export function BattlePage({
           )}
           <p>
             Each round played earns 4 XP and 6 coins. Each round you win adds 8
-            XP and 12 coins. Win the match for a bonus that grows with the round
-            limit.
+            XP and 12 coins. {isPokemon ? "Defeat the opposing team for a match bonus." : "Win the match for a bonus that grows with the round limit."}
           </p>
           <p>
             Materials: one for a match victory, plus one per 3 rounds won and
-            per 6 rounds played, up to 6. Classic prizes count up to{" "}
+            per 6 rounds played, up to 6. {isPokemon ? "Match" : "Classic"} prizes count up to{" "}
             {progression.rewardedRoundCap} played rounds. Unfinished matches
             award no prizes.
           </p>
         </div>
         <div className="tip">
           Opponent attributes stay hidden until the round resolves. AI uses only
-          its own card and public base-stat averages. Classic resolves at{" "}
-          {progression.classicRoundLimit} rounds if neither deck is exhausted.
-          Each side can choose each stat only once per fight. When both sides
-          run out, the final score decides the winner.
+          its own card and public base-stat averages. {isPokemon ? "Each side can choose each of the six stats once per set. Choices reset after a set or when its Pokémon faints. The last team standing wins. Ties deal 10 damage to both Pokémon." : `Classic resolves at ${progression.classicRoundLimit} rounds if neither deck is exhausted. Each side can choose each stat only once per fight. When both sides run out, the final score decides the winner.`}
         </div>
       </>
     );
@@ -271,6 +273,7 @@ export function BattlePage({
     ),
     opponent = battle.last?.enemyStats || opponentStats(battle, ac.baseStats),
     prizes = matchPrizes(battle);
+  ensurePokemonHealth(battle, s);
   return (
     <div
       className={`arena ${battle.last ? `impact-${battle.last.winner}` : ""}`}
@@ -302,12 +305,14 @@ export function BattlePage({
       </div>
       {tutorial && (
         <div className="tutorial-banner">
-          It’s morphin time! Pick one of your strongest stats. Your opponent’s
-          stats are secret until the fight. Highest value wins; the winner
-          chooses next.
+          {isPokemon ? "Let’s battle, Trainer!" : "It’s morphin time!"} Pick one
+          of your strongest stats. Your opponent’s stats are secret until the
+          fight. Highest value wins; the winner chooses next.
         </div>
       )}
-      {battle.boss && (
+      {isPokemon && <div className="tutorial-banner">Compare a stat to damage the losing Pokémon. Winners stay in play; a Pokémon switches only when its health reaches zero. After all six stats are used, your choices reset.</div>}
+      {isPokemon && <div className="type-matchup-strip">{[[pc.id, ac.id, pc.name], [ac.id, pc.id, ac.name]].map(([own, enemy, name], i) => { const bonus = pokemonMatchupBonus(own, enemy); return <span key={i}><strong>{name}</strong> · {bonus > 0 ? "Type advantage: +5 all stats" : bonus < 0 ? "Type disadvantage: −5 all stats" : "Neutral type matchup: no stat change"}</span>; })}</div>}
+      {battle.boss && !isPokemon && (
         <div className="tutorial-banner">
           Boss phase{" "}
           {Math.min(
@@ -339,7 +344,7 @@ export function BattlePage({
           </small>
         </section>
         <div>
-          <small>Dimensional rival</small>
+          <small>{isPokemon ? "Rival Trainer" : "Dimensional rival"}</small>
           <strong>{battle.scores[1]}</strong>
           <span>
             {battle.ai.length} cards{" "}
@@ -347,6 +352,15 @@ export function BattlePage({
           </span>
         </div>
       </div>
+      {battle.health && <div className="pokemon-health-row" aria-live="polite">
+        {(["player", "ai"] as const).map(side => {
+          const values = battle.health!;
+          const fainted = battle.last?.fainted?.includes(side === "player" ? pc.id : ac.id);
+          const maximum = values[side === "player" ? "playerMax" : "aiMax"][0] || 1;
+          const hp = fainted ? 0 : values[side][0] || 0;
+          return <div className="panel" key={side}><strong>{side === "player" ? pc.name : ac.name} · {fainted ? "Fainted" : `${hp}/${maximum} health`}</strong><progress max={maximum} value={hp} aria-label={`${side === "player" ? pc.name : ac.name} health`} /></div>;
+        })}
+      </div>}
       {abilityNotices(battle).map((notice) => (
         <div
           key={notice.title}
@@ -356,9 +370,9 @@ export function BattlePage({
           <strong>{notice.title}</strong>
           <p>
             {notice.description}{" "}
-            {notice.side === "player"
+            {notice.title.includes(" uses ") && (notice.side === "player"
               ? "Your team’s fight boost has been used."
-              : "Enemy ability active."}
+              : "Enemy ability active.")}
           </p>
         </div>
       ))}
@@ -370,8 +384,23 @@ export function BattlePage({
           battleValues={ps}
         />
         <div className="stat-choices">
+          {isPokemon &&
+            items
+              .filter(
+                (i) =>
+                  i.grantedAbility && s.cards[pc.id]?.equipment.includes(i.id),
+              )
+              .map((i) => (
+                <p className="tip" key={i.id}>
+                  {i.name} · {i.grantedAbility!.name}:{" "}
+                  {Object.entries(i.grantedAbility!.modifiers)
+                    .map(([k, v]) => `+${v! * (s.items[i.id] || 1)} ${k}`)
+                    .join(" · ")}
+                  . Included in your battle stats.
+                </p>
+              ))}
           <p className="tip">
-            Each stat can be chosen once per side for the whole fight. Your
+            Each stat can be chosen once per side {isPokemon ? "per set of six comparisons" : "for the whole fight"}. Your
             choices remaining: {availableStats(battle, "player").length} ·
             Opponent: {availableStats(battle, "ai").length}.
           </p>
@@ -406,8 +435,8 @@ export function BattlePage({
                       )
                     }
                   >
-                    {statKeys.map((k) => (
-                      <option key={k}>{k}</option>
+                    {battleStatKeys.map((k) => (
+                      <option key={k} value={k}>{statLabel(k)}</option>
                     ))}
                   </select>
                 </label>
@@ -440,7 +469,7 @@ export function BattlePage({
           <span className="eyebrow">
             {battle.last ? "ROUND REVEALED" : "SELECT YOUR STRONGEST STAT"}
           </span>
-          {statKeys.map((k) => (
+          {battleStatKeys.map((k) => (
             <button
               disabled={
                 !!battle.last ||
@@ -454,11 +483,11 @@ export function BattlePage({
             >
               <strong>{ps[k]}</strong>
               <span>
-                {k === "special" ? "Special ability" : k}
+                {statLabel(k)}
                 {battle.usedStats?.player.includes(k) ? " · Used by you" : ""}
                 {battle.usedStats?.ai.includes(k) ? " · Used by opponent" : ""}
                 {abilityNotices(battle).some((n) => n.stats.includes(k))
-                  ? " · Ability active"
+                  ? " · Bonus active"
                   : ""}
               </span>
               <b
@@ -503,8 +532,9 @@ export function BattlePage({
                     : "Opponent takes the round"}
               </b>
               <p>
-                {battle.last.a} vs {battle.last.b} · {battle.last.stat}
+                {battle.last.a} vs {battle.last.b} · {statLabel(battle.last.stat)}
               </p>
+              {battle.last.damage && <p>{battle.last.damage} damage · {battle.last.fainted?.length ? "A Pokémon fainted. The next card enters." : "Active Pokémon stay in play."}</p>}
               <button
                 className="primary"
                 onClick={() => setBattle({ ...battle, last: undefined })}
@@ -579,7 +609,7 @@ export function BattlePage({
                 ? "Replay complete. First-clear prizes were already claimed."
                 : (() => {
                     const c = chapters.find((c) => c.id === battle.chapter)!;
-                    return `Chapter bonus: +${c.coins} coins · +${c.xp} XP · +${c.boss ? 4 : 2} materials · ${c.item.split("-").join(" ")}${"card" in c ? " + Green Ranger" : ""}. Awarded once.`;
+                    return `Chapter bonus: +${c.coins} coins · +${c.xp} XP · +${c.boss ? 4 : 2} materials · ${c.item.split("-").join(" ")}${c.card ? (isPokemon ? " + Eevee" : " + Green Ranger") : ""}. Awarded once.`;
                   })()}
             </p>
           )}

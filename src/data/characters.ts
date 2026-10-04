@@ -1,3 +1,5 @@
+import { isPokemon } from "../game/gameMode";
+import { pokemonCharacters } from "./pokemon";
 import type { Character, Rarity, Stats } from "../types";
 import { statKeys } from "../types";
 import { characterStats } from "./characterStats";
@@ -93,7 +95,7 @@ const colors = [
   "#b4c9df",
   "#ab6fde",
 ];
-export const heroes: Character[] = entries.map(
+const multiverseHeroes: Character[] = entries.map(
   ([franchise, group, name, description], i) => {
     const n = i % 8;
     const baseStats = { ...characterStats[`${franchise}-${n}`] };
@@ -151,6 +153,7 @@ export const heroes: Character[] = entries.map(
     };
   },
 );
+export const heroes = isPokemon ? pokemonCharacters : multiverseHeroes;
 const villainDefinitions: [string, string, string, number[]][] = [
   ["rita", "Rita Repulsa", "rangers", [35, 42, 90, 52, 61, 90, 96, 55]],
   ["goldar", "Goldar", "rangers", [89, 62, 48, 88, 85, 76, 72, 30]],
@@ -160,9 +163,9 @@ const villainDefinitions: [string, string, string, number[]][] = [
   ["joker", "The Joker", "dc", [32, 48, 95, 65, 42, 45, 89, 76]],
   ["harley", "Harley Quinn", "dc", [46, 86, 76, 89, 55, 38, 73, 52]],
 ];
-export const villains: Character[] = villainDefinitions.map(
+const multiverseVillains: Character[] = villainDefinitions.map(
   ([id, name, franchise, values], index) => ({
-    ...heroes.find((c) => c.franchise === franchise)!,
+    ...multiverseHeroes.find((c) => c.franchise === franchise)!,
     id: `enemy-${id}`,
     name,
     franchise,
@@ -183,6 +186,7 @@ export const villains: Character[] = villainDefinitions.map(
     compatibleEquipment: ["shield", "scanner"],
   }),
 );
+export const villains = isPokemon ? [] : multiverseVillains;
 export const characters = [...heroes, ...villains];
 export const getCharacters = (s: Save) =>
   s.customHero ? [...characters, heroCharacter(s.customHero)] : characters;

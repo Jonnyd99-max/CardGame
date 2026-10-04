@@ -1,3 +1,5 @@
+import { isPokemon } from "./game/gameMode";
+import { GameModeToggle } from "./components/GameModeToggle";
 import { progression } from "./data/unlocks";
 import { useState, useEffect, useRef } from "react";
 import {
@@ -220,34 +222,47 @@ export default function App() {
             <Zap fill="currentColor" />
           </span>
           <div>
-            JD MULTIVERSE<small>BATTLE CARDS</small>
+            {isPokemon ? "JD POKÉMON" : "JD MULTIVERSE"}
+            <small>BATTLE CARDS</small>
           </div>
         </button>
-        <span className="nav-caption">YOUR MULTIVERSE</span>
+        <span className="nav-caption">
+          {isPokemon ? "YOUR KANTO ADVENTURE" : "YOUR MULTIVERSE"}
+        </span>
         <nav>
-          {nav.map(([name, Icon]) => (
-            <button
-              className={
-                current === name ||
-                (current === "Collection" && name === "My Collection")
-                  ? "active"
-                  : ""
-              }
-              key={name}
-              onClick={() => navigate(name)}
-            >
-              <Icon size={19} />
-              <span>{name}</span>
-              {name === "My Collection" && <small>{save.owned.length}</small>}
-              {name === "Play" && <span className="live-dot" />}
-            </button>
-          ))}
+          {nav
+            .filter(([name]) => !isPokemon || name !== "Make a Hero")
+            .map(([name, Icon]) => (
+              <button
+                className={
+                  current === name ||
+                  (current === "Collection" && name === "My Collection")
+                    ? "active"
+                    : ""
+                }
+                key={name}
+                onClick={() => navigate(name)}
+              >
+                <Icon size={19} />
+                <span>
+                  {isPokemon && name === "Teams / Groups"
+                    ? "Pokémon Types"
+                    : isPokemon && name === "Equipment"
+                      ? "Items & Trainers"
+                      : isPokemon && name === "Boss Battles" ? "Gym Leaders"
+                      : isPokemon && name === "My Collection" ? "Pokédex"
+                      : name}
+                </span>
+                {name === "My Collection" && <small>{save.owned.length}</small>}
+                {name === "Play" && <span className="live-dot" />}
+              </button>
+            ))}
         </nav>
         <div className="sidebar-bottom">
           <div className="theme-tag">
             <span className="live-dot" />
             <section>
-              <small>ACTIVE UNIVERSE</small>
+              <small>{isPokemon ? "ACTIVE TYPE" : "ACTIVE UNIVERSE"}</small>
               <b>{franchises.find((f) => f.id === save.franchise)?.name}</b>
             </section>
           </div>
@@ -287,17 +302,20 @@ export default function App() {
             >
               <Menu />
             </button>
-            <span>Multiverse</span>
+            <span>{isPokemon ? "Pokémon" : "Multiverse"}</span>
             <ChevronRight size={14} />
             <b>
               {detail
                 ? "Character details"
                 : current === "Collection"
                   ? "My Collection"
+                  : isPokemon && current === "Boss Battles" ? "Gym Leaders"
+                  : isPokemon && current === "My Collection" ? "Pokédex"
                   : current}
             </b>
           </div>
           <div className="topbar-right">
+            <GameModeToggle beforeSwitch={() => saveStorage.save(save)} />
             <span className="currency">
               <Coins size={18} />
               <b>{save.coins.toLocaleString()}</b>
@@ -407,7 +425,11 @@ export default function App() {
           )}
         </main>
         <footer>
-          <span>JD MULTIVERSE BATTLE CARDS</span>
+          <span>
+            {isPokemon
+              ? "JD POKÉMON BATTLE CARDS"
+              : "JD MULTIVERSE BATTLE CARDS"}
+          </span>
           <small>Collect. Evolve. Become legendary.</small>
           <span>
             LOCAL SAVE <i className="live-dot" />

@@ -1,3 +1,5 @@
+import { franchises } from "./franchises";
+import { isPokemon } from "../game/gameMode";
 import type { Save } from "../types";
 export const challenges = [
   {
@@ -54,10 +56,12 @@ export const challenges = [
     value: (s: Save) => s.perfectWins,
     coins: 200,
   },
-  ...["rangers", "marvel", "dc", "rick"].map((f) => ({
+  ...franchises.map(({ id: f }) => ({
     id: `win-${f}`,
     name: `Champion of ${f}`,
-    description: "Win with a character from this universe.",
+    description: isPokemon
+      ? "Win with a Pokémon of this type."
+      : "Win with a character from this universe.",
     period: "Permanent",
     target: 1,
     value: (s: Save) => s.franchiseWins[f] || 0,
